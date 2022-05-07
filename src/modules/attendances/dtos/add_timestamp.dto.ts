@@ -5,8 +5,8 @@ export class AddTimestampDto<T = string> {
     message: "InvalidUserId",
   })
   readonly userId: number;
-  @IsDateString({
-    message: "InvalidTimestamp",
-  })
+  // @IsDateString({
+  //   message: "InvalidTimestamp",
+  // })
   readonly timestamp: T;
 }
