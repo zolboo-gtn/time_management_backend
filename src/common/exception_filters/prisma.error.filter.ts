@@ -42,14 +42,26 @@ export class PrismaErrorFilter implements ExceptionFilter {
       path: request.url,
     };
     if (error instanceof PrismaClientRustPanicError) {
+      errorResponse = produce(errorResponse, (draft) => {
+        draft.message = error.message;
+      });
     } else if (error instanceof PrismaClientValidationError) {
+      errorResponse = produce(errorResponse, (draft) => {
+        draft.message = error.message;
+      });
     } else if (error instanceof PrismaClientKnownRequestError) {
       errorResponse = produce(errorResponse, (draft) => {
         draft.code = error.code;
         draft.message = error.message;
       });
     } else if (error instanceof PrismaClientInitializationError) {
+      errorResponse = produce(errorResponse, (draft) => {
+        draft.message = error.message;
+      });
     } else {
+      errorResponse = produce(errorResponse, (draft) => {
+        draft.message = error.message;
+      });
     }
 
     response.status(status).json(errorResponse);
