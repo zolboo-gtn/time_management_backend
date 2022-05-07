@@ -28,7 +28,7 @@ export class AttendancesController {
   }
 
   @Patch("/addTimestamp")
-  async Patch(@Body() { timestamp, userId }: AddTimestampDto) {
+  async addTimestamp(@Body() { timestamp, userId }: AddTimestampDto) {
     return await this.attendancesService.addTimestamp({
       timestamp: new Date(timestamp),
       userId,
