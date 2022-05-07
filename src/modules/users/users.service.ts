@@ -59,17 +59,11 @@ export class UsersService {
   }
   async update(id: number, data: UpdateUserDto) {
     const user = await this.prisma.user.update({ data, where: { id } });
-    if (!user) {
-      throw new NotFoundException();
-    }
 
     return new UserEntity(user);
   }
   async remove(id: number) {
     const user = await this.prisma.user.delete({ where: { id } });
-    if (!user) {
-      throw new NotFoundException();
-    }
 
     return new UserEntity(user);
   }

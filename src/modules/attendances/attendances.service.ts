@@ -18,10 +18,7 @@ export class AttendancesService {
     return attendance;
   }
   async update(id: number, data: UpdateAttendanceDto<Date>) {
-    const user = await this.prisma.attendance.update({ data, where: { id } });
-    if (!user) {
-      throw new NotFoundException();
-    }
+    await this.prisma.attendance.update({ data, where: { id } });
   }
   async addTimestamp({ timestamp, userId }: AddTimestampDto<Date>) {
     const today = new Date(new Date().setUTCHours(0, 0, 0, 0));
@@ -48,9 +45,6 @@ export class AttendancesService {
     });
   }
   async remove(id: number) {
-    const attendance = await this.prisma.attendance.delete({ where: { id } });
-    if (!attendance) {
-      throw new NotFoundException();
-    }
+    await this.prisma.attendance.delete({ where: { id } });
   }
 }
