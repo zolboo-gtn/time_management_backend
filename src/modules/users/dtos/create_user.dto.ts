@@ -1,11 +1,5 @@
 import { Role } from "@prisma/client";
-import {
-  IsEmail,
-  IsEnum,
-  IsOptional,
-  IsString,
-  Matches,
-} from "class-validator";
+import { IsEmail, IsEnum, IsString, Matches } from "class-validator";
 
 export class CreateUserDto {
   @IsEmail({
@@ -22,6 +16,11 @@ export class CreateUserDto {
     message: "InvalidRole",
   })
   readonly role: Role;
+
+  @IsString({
+    message: "InvalidCardId",
+  })
+  readonly cardId: string;
 
   @Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,16}$/, {
     message: "InvalidPassword",

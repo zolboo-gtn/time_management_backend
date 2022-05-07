@@ -1,11 +1,15 @@
-import { Role, User } from "@prisma/client";
+import { Attendance, Role, User } from "@prisma/client";
 import { Exclude } from "class-transformer";
 
 export class UserEntity implements User {
   id: number;
+  createdAt: Date;
+  updatedAt: Date;
   email: string;
-  name: string | null;
+  name: string;
   role: Role;
+  cardId: string;
+  attendance: Attendance[];
 
   @Exclude()
   hash: string;

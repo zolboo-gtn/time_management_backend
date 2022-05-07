@@ -9,7 +9,7 @@ import { UserEntity } from "./entities/user.entity";
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async create({ email, name, role, password }: CreateUserDto) {
+  async create({ email, name, role, cardId, password }: CreateUserDto) {
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
 
@@ -18,6 +18,7 @@ export class UsersService {
         email,
         name,
         role,
+        cardId,
         hash,
       },
     });
@@ -25,13 +26,20 @@ export class UsersService {
     return new UserEntity(user);
   }
   async findAll() {
-    const users = await this.prisma.user.findMany();
+    const users = await this.prisma.user.findMany({
+      include: {
+        attendance: true,
+      },
+    });
 
     return UserEntity.usersFromJson(users);
   }
   async findOneById(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
+      include: {
+        attendance: true,
+      },
     });
     if (!user) {
       throw new NotFoundException();

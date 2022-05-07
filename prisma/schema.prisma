@@ -11,11 +11,26 @@ datasource db {
 }
 
 model User {
-  id    Int    @id @default(autoincrement())
-  email String @unique
-  name  String
-  role  Role
-  hash  String
+  id         Int          @id @default(autoincrement())
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  //
+  email      String       @unique
+  name       String
+  role       Role
+  cardId     String       @unique
+  hash       String
+  attendance Attendance[]
+}
+
+model Attendance {
+  id         Int        @id @default(autoincrement())
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  //
+  timestamps DateTime[]
+  user       User       @relation(fields: [userId], references: [id])
+  userId     Int
 }
 
 enum Role {
