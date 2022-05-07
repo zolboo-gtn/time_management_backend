@@ -1,11 +1,11 @@
-import { IsInt, IsDateString } from "class-validator";
+import { IsInt, IsDate } from "class-validator";
 
 export class AddTimestampDto<T = string> {
   @IsInt({
     message: "InvalidUserId",
   })
   readonly userId: number;
-  @IsDateString({
+  @IsDate({
     message: "InvalidTimestamp",
   })
   readonly timestamp: T;
