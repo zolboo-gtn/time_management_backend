@@ -23,7 +23,13 @@ export class AttendancesService {
       throw new NotFoundException();
     }
   }
-  async addTimestamp({ timestamp, userId }: AddTimestampDto<Date>) {
+  async addTimestamp({
+    timestamp,
+    userId,
+  }: {
+    timestamp: Date;
+    userId: number;
+  }) {
     const today = new Date(new Date().setUTCHours(0, 0, 0, 0));
     const attendance = await this.prisma.attendance.findFirst({
       where: {
