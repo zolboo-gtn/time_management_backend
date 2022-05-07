@@ -1,7 +1,7 @@
-import { IsDate } from "class-validator";
+import { IsDateString } from "class-validator";
 
 export class UpdateAttendanceDto<T = string> {
-  @IsDate({
+  @IsDateString({
     each: true,
     message: "InvalidTimestamp",
   })
