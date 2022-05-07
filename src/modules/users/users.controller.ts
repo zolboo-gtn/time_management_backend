@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
@@ -24,7 +25,12 @@ export class UsersController {
 
   @Get(":id")
   async findOneById(@Param("id", ParseIntPipe) id: number) {
-    return await this.usersService.findOneById(id);
+    const user = await this.usersService.findOneById(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return user;
   }
 
   @UseGuards(JwtRoleGuard("ADMIN", "OWNER"))
