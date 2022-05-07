@@ -12,7 +12,7 @@ import { PrismaService } from "modules/prisma";
 
 const bootstrap = async () => {
   const app = await NestFactory.create(AppModule, {
-    logger: ["error"],
+    // logger: ["error"],
   });
   app.useGlobalFilters(
     new HttpExceptionFilter(),
