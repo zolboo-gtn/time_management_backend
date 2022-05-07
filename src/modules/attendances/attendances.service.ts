@@ -17,10 +17,10 @@ export class AttendancesService {
 
     return attendance;
   }
-  async update(id: number, data: UpdateAttendanceDto<Date>) {
+  async update(id: number, data: UpdateAttendanceDto) {
     await this.prisma.attendance.update({ data, where: { id } });
   }
-  async addTimestamp({ timestamp, userId }: AddTimestampDto<Date>) {
+  async addTimestamp({ timestamp, userId }: AddTimestampDto) {
     const today = new Date(new Date().setUTCHours(0, 0, 0, 0));
     const attendance = await this.prisma.attendance.findFirst({
       where: {

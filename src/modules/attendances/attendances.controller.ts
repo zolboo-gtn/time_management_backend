@@ -23,14 +23,14 @@ export class AttendancesController {
     @Body() { timestamps }: UpdateAttendanceDto,
   ) {
     return await this.attendancesService.update(id, {
-      timestamps: timestamps.map((timestamp) => new Date(timestamp)),
+      timestamps,
     });
   }
 
   @Patch("/addTimestamp")
   async addTimestamp(@Body() { timestamp, userId }: AddTimestampDto) {
     return await this.attendancesService.addTimestamp({
-      timestamp: new Date(timestamp),
+      timestamp,
       userId,
     });
   }
