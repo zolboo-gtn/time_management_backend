@@ -25,6 +25,7 @@ export class CustomValidationErrorFilter implements ExceptionFilter {
       code: Object.values(
         errors.find(({ constraints }) => constraints !== {})?.constraints ?? {},
       ).find((value) => value),
+      message: "CustomValidationErrorFilter",
     };
 
     response.status(status).json(errorResponse);
