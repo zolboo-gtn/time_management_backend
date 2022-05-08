@@ -16,21 +16,26 @@ import { AttendancesService } from "./attendances.service";
 export class AttendancesController {
   constructor(private readonly attendancesService: AttendancesService) {}
 
+  @Patch("/addTimestamp")
+  async addTimestamp(@Body() { timestamp, userId }: AddTimestampDto) {
+    console.log("timestamp", timestamp);
+
+    return await this.attendancesService.addTimestamp({
+      timestamp,
+      userId,
+    });
+  }
+
   @UseGuards(JwtRoleGuard("ADMIN"))
   @Patch(":id")
   async update(
     @Param("id", ParseIntPipe) id: number,
-    @Body() data: UpdateAttendanceDto,
+    @Body() { timestamps }: UpdateAttendanceDto,
   ) {
-    console.log("data", data);
-    return await this.attendancesService.update(id, data);
-  }
-
-  @Patch("/addTimestamp")
-  async addTimestamp(@Body() data: AddTimestampDto) {
-    console.log("data", data);
-
-    return await this.attendancesService.addTimestamp(data);
+    console.log("timestamps", timestamps);
+    return await this.attendancesService.update(id, {
+      timestamps,
+    });
   }
 
   @UseGuards(JwtRoleGuard("ADMIN"))
