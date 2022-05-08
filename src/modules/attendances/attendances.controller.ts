@@ -20,22 +20,17 @@ export class AttendancesController {
   @Patch(":id")
   async update(
     @Param("id", ParseIntPipe) id: number,
-    @Body() { timestamps }: UpdateAttendanceDto,
+    @Body() data: UpdateAttendanceDto,
   ) {
-    console.log("timestamps", timestamps);
-    return await this.attendancesService.update(id, {
-      timestamps,
-    });
+    console.log("data", data);
+    return await this.attendancesService.update(id, data);
   }
 
   @Patch("/addTimestamp")
-  async addTimestamp(@Body() { timestamp, userId }: AddTimestampDto) {
-    console.log("timestamp", timestamp);
+  async addTimestamp(@Body() data: AddTimestampDto) {
+    console.log("data", data);
 
-    return await this.attendancesService.addTimestamp({
-      timestamp,
-      userId,
-    });
+    return await this.attendancesService.addTimestamp(data);
   }
 
   @UseGuards(JwtRoleGuard("ADMIN"))
