@@ -22,6 +22,7 @@ export class AttendancesController {
     @Param("id", ParseIntPipe) id: number,
     @Body() { timestamps }: UpdateAttendanceDto,
   ) {
+    console.log("timestamps", timestamps);
     return await this.attendancesService.update(id, {
       timestamps,
     });
@@ -29,6 +30,8 @@ export class AttendancesController {
 
   @Patch("/addTimestamp")
   async addTimestamp(@Body() { timestamp, userId }: AddTimestampDto) {
+    console.log("timestamp", timestamp);
+
     return await this.attendancesService.addTimestamp({
       timestamp,
       userId,
