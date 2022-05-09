@@ -1,10 +1,12 @@
-import { IsArray, IsDateString } from "class-validator";
+import { IsDateString } from "class-validator";
 
 export class UpdateAttendanceDto {
-  @IsArray()
-  @IsDateString({
-    each: true,
-    message: "InvalidTimestamp",
-  })
+  @IsDateString(
+    { strict: true },
+    {
+      each: true,
+      message: "InvalidTimestamp",
+    },
+  )
   readonly timestamps: string[];
 }

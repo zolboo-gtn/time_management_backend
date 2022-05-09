@@ -18,7 +18,6 @@ export class CustomValidationErrorFilter implements ExceptionFilter {
     const status = HttpStatus.BAD_REQUEST;
 
     const { errors } = error;
-    console.log("error", JSON.stringify(error));
     const errorResponse: ICustomError = {
       statusCode: status,
       timestamp: new Date().toISOString(),
