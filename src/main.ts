@@ -14,6 +14,7 @@ const bootstrap = async () => {
   const app = await NestFactory.create(AppModule, {
     logger: ["error"],
   });
+
   app.useGlobalFilters(
     new HttpExceptionFilter(),
     new PrismaErrorFilter(),
@@ -22,9 +23,14 @@ const bootstrap = async () => {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalPipes(new CustomValidationPipe());
 
-  // https://docs.nestjs.com/recipes/prisma#issues-with-enableshutdownhooks
+  // prisma
   const prismaService: PrismaService = app.get(PrismaService);
   prismaService.enableShutdownHooks(app);
+
+  // CORS
+  app.enableCors({
+    origin: ["http://localhost:3000"],
+  });
 
   await app.listen(process.env.PORT || 3000);
 };
