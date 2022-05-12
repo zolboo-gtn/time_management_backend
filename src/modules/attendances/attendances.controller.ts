@@ -8,7 +8,11 @@ import {
   UseGuards,
 } from "@nestjs/common";
 
-import { AddTimestampDto, UpdateAttendanceDto } from "./dtos";
+import {
+  AddTimestampByCardIdDto,
+  AddTimestampByUserIdDto,
+  UpdateAttendanceDto,
+} from "./dtos";
 import { JwtRoleGuard } from "./guards";
 import { AttendancesService } from "./attendances.service";
 
@@ -16,9 +20,20 @@ import { AttendancesService } from "./attendances.service";
 export class AttendancesController {
   constructor(private readonly attendancesService: AttendancesService) {}
 
-  @Patch("/addTimestamp")
-  async addTimestamp(@Body() { timestamp, userId }: AddTimestampDto) {
-    return await this.attendancesService.addTimestamp({
+  @Patch("/addTimestampByCardId")
+  async addTimestampByCardId(
+    @Body() { timestamp, cardId }: AddTimestampByCardIdDto,
+  ) {
+    return await this.attendancesService.addTimestampByCardId({
+      timestamp,
+      cardId,
+    });
+  }
+  @Patch("/addTimestampByUserId")
+  async addTimestampByUserId(
+    @Body() { timestamp, userId }: AddTimestampByUserIdDto,
+  ) {
+    return await this.attendancesService.addTimestampByUserId({
       timestamp,
       userId,
     });

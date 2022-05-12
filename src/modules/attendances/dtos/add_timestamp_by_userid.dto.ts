@@ -1,6 +1,6 @@
 import { IsInt, IsDateString } from "class-validator";
 
-export class AddTimestampDto {
+export class AddTimestampByUserIdDto {
   @IsInt({
     message: "InvalidUserId",
   })
