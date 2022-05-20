@@ -91,7 +91,7 @@ export class AttendancesService {
         userId,
         createdAt: {
           gte: startDate ? new Date(startDate) : undefined,
-          lt: endDate ? new Date(endDate) : undefined,
+          lte: endDate ? new Date(endDate) : undefined,
         },
       },
     });
