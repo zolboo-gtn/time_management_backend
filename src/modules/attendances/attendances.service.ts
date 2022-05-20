@@ -5,6 +5,7 @@ import {
   AddTimestampByCardIdDto,
   AddTimestampByUserIdDto,
   UpdateAttendanceDto,
+  UserAttendanceDto,
 } from "./dtos";
 
 @Injectable()
@@ -82,5 +83,18 @@ export class AttendancesService {
   }
   async remove(id: number) {
     await this.prisma.attendance.delete({ where: { id } });
+  }
+  async getUserAttendance({ userId, startDate, endDate }: UserAttendanceDto) {
+    const attendance = await this.prisma.attendance.findMany({
+      where: {
+        userId,
+        createdAt: {
+          gte: startDate ? new Date(startDate) : undefined,
+          lt: endDate ? new Date(endDate) : undefined,
+        },
+      },
+    });
+
+    return attendance;
   }
 }

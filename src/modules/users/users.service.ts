@@ -26,20 +26,13 @@ export class UsersService {
     return new UserEntity(user);
   }
   async findAll() {
-    const users = await this.prisma.user.findMany({
-      include: {
-        attendance: true,
-      },
-    });
+    const users = await this.prisma.user.findMany();
 
     return UserEntity.usersFromJson(users);
   }
   async findOneById(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
-      include: {
-        attendance: true,
-      },
     });
     if (!user) {
       throw new NotFoundException();

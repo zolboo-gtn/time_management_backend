@@ -2,9 +2,11 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
   ParseIntPipe,
   Patch,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 
@@ -12,6 +14,7 @@ import {
   AddTimestampByCardIdDto,
   AddTimestampByUserIdDto,
   UpdateAttendanceDto,
+  UserAttendanceDto,
 } from "./dtos";
 import { JwtRoleGuard } from "./guards";
 import { AttendancesService } from "./attendances.service";
@@ -54,5 +57,11 @@ export class AttendancesController {
   @Delete(":id")
   async remove(@Param("id", ParseIntPipe) id: number) {
     return await this.attendancesService.remove(id);
+  }
+
+  @UseGuards(JwtRoleGuard("ADMIN"))
+  @Get("/userAttendance")
+  async getUserAttendance(@Query() query: UserAttendanceDto) {
+    return await this.attendancesService.getUserAttendance(query);
   }
 }
