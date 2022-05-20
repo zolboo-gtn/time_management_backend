@@ -6,10 +6,11 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 
-import { UpdateUserDto } from "./dtos";
+import { SearchUsersDto, UpdateUserDto } from "./dtos";
 import { JwtRoleGuard } from "./guards";
 import { UsersService } from "./users.service";
 
@@ -18,8 +19,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  async findAll() {
-    return await this.usersService.findAll();
+  async findAll(@Query() query: SearchUsersDto) {
+    return await this.usersService.findAll(query);
   }
 
   @Get(":id")

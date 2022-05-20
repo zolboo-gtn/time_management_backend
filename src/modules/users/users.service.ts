@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 
 import { PrismaService } from "modules/prisma";
-import { CreateUserDto, UpdateUserDto } from "./dtos";
+import { CreateUserDto, SearchUsersDto, UpdateUserDto } from "./dtos";
 import { UserEntity } from "./entities/user.entity";
 
 @Injectable()
@@ -25,8 +25,23 @@ export class UsersService {
 
     return new UserEntity(user);
   }
-  async findAll() {
-    const users = await this.prisma.user.findMany();
+  async findAll({
+    cardId,
+    email,
+    name,
+    role,
+    sortingField,
+    sortingOrder,
+  }: SearchUsersDto) {
+    const users = await this.prisma.user.findMany({
+      where: {
+        cardId: { contains: cardId },
+        email: { contains: email },
+        name: { contains: name },
+        role,
+      },
+      orderBy: sortingField ? { [sortingField]: sortingOrder } : undefined,
+    });
 
     return UserEntity.usersFromJson(users);
   }
