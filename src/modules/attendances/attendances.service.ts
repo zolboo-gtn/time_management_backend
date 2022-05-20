@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import * as dayjs from "dayjs";
 
 import { PrismaService } from "modules/prisma";
 import {
@@ -26,7 +27,7 @@ export class AttendancesService {
     await this.prisma.attendance.update({ data, where: { id } });
   }
   async addTimestampByCardId({ timestamp, cardId }: AddTimestampByCardIdDto) {
-    const today = new Date(new Date().setUTCHours(0, 0, 0, 0));
+    const today = dayjs().startOf("day").toDate();
     const user = await this.prisma.user.findUnique({
       where: {
         cardId,
@@ -58,7 +59,7 @@ export class AttendancesService {
     });
   }
   async addTimestampByUserId({ timestamp, userId }: AddTimestampByUserIdDto) {
-    const today = new Date(new Date().setUTCHours(0, 0, 0, 0));
+    const today = dayjs().startOf("day").toDate();
     const attendance = await this.prisma.attendance.findFirst({
       where: {
         userId,

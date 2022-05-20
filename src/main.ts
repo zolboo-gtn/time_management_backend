@@ -1,5 +1,7 @@
-import { ClassSerializerInterceptor } from "@nestjs/common";
+import { ClassSerializerInterceptor, INestApplication } from "@nestjs/common";
 import { NestFactory, Reflector } from "@nestjs/core";
+import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
+import * as dayjs from "dayjs";
 
 import {
   CustomValidationErrorFilter,
@@ -9,6 +11,18 @@ import {
 import { CustomValidationPipe } from "common/pipes";
 import { AppModule } from "modules/app";
 import { PrismaService } from "modules/prisma";
+
+const setupSwagger = (app: INestApplication) => {
+  const config = new DocumentBuilder()
+    .setTitle("Title")
+    .setDescription("Description")
+    .setVersion("Version")
+    .setBasePath("https://afternoon-garden-59095.herokuapp.com")
+    .addTag("tag")
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup("api/docs", app, document);
+};
 
 const bootstrap = async () => {
   const app = await NestFactory.create(AppModule, {
@@ -26,6 +40,9 @@ const bootstrap = async () => {
   // prisma
   const prismaService: PrismaService = app.get(PrismaService);
   prismaService.enableShutdownHooks(app);
+
+  // swagger
+  setupSwagger(app);
 
   // CORS
   app.enableCors({
