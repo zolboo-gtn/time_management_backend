@@ -59,7 +59,7 @@ export class AttendancesService {
     });
   }
   async addTimestampByUserId({ timestamp, userId }: AddTimestampByUserIdDto) {
-    const today = dayjs().startOf("day").subtract(8, "hour").toDate();
+    const today = dayjs().startOf("day").toDate();
     const attendance = await this.prisma.attendance.findFirst({
       where: {
         userId,
