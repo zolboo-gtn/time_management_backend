@@ -28,6 +28,7 @@ export class AttendancesService {
   }
   async addTimestampByCardId({ timestamp, cardId }: AddTimestampByCardIdDto) {
     const today = dayjs().startOf("day").toDate();
+    console.log("today", today, today.toLocaleString());
     const user = await this.prisma.user.findUnique({
       where: {
         cardId,
