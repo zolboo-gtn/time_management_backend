@@ -27,7 +27,12 @@ export class AttendancesService {
     await this.prisma.attendance.update({ data, where: { id } });
   }
   async addTimestampByCardId({ timestamp, cardId }: AddTimestampByCardIdDto) {
-    const today = dayjs().startOf("day").toDate();
+    const today = dayjs()
+      .add(8, "hour")
+      .startOf("day")
+      .subtract(8, "hour")
+      .toDate();
+    console.log("today", today);
     const user = await this.prisma.user.findUnique({
       where: {
         cardId,
@@ -59,7 +64,11 @@ export class AttendancesService {
     });
   }
   async addTimestampByUserId({ timestamp, userId }: AddTimestampByUserIdDto) {
-    const today = dayjs().startOf("day").toDate();
+    const today = dayjs()
+      .add(8, "hour")
+      .startOf("day")
+      .subtract(8, "hour")
+      .toDate();
     const attendance = await this.prisma.attendance.findFirst({
       where: {
         userId,
