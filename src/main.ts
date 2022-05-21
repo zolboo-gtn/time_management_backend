@@ -26,7 +26,7 @@ const setupSwagger = (app: INestApplication) => {
 
 const bootstrap = async () => {
   const app = await NestFactory.create(AppModule, {
-    logger: ["error"],
+    logger: ["verbose"],
   });
 
   app.useGlobalFilters(
