@@ -10,6 +10,8 @@ import {
   UseGuards,
 } from "@nestjs/common";
 
+import { MonitorService } from "modules/monitor";
+import { AttendancesService } from "./attendances.service";
 import {
   AddTimestampByCardIdDto,
   AddTimestampByUserIdDto,
@@ -17,20 +19,25 @@ import {
   UserAttendanceDto,
 } from "./dtos";
 import { JwtRoleGuard } from "./guards";
-import { AttendancesService } from "./attendances.service";
 
 @Controller("attendances")
 export class AttendancesController {
-  constructor(private readonly attendancesService: AttendancesService) {}
+  constructor(
+    private readonly attendancesService: AttendancesService,
+    private monitorService: MonitorService,
+  ) {}
 
   @Patch("/addTimestampByCardId")
   async addTimestampByCardId(
     @Body() { timestamp, cardId }: AddTimestampByCardIdDto,
   ) {
-    return await this.attendancesService.addTimestampByCardId({
+    await this.attendancesService.addTimestampByCardId({
       timestamp,
       cardId,
     });
+    await this.monitorService.notifyMonitors({ timestamp, cardId });
+
+    return;
   }
   @Patch("/addTimestampByUserId")
   async addTimestampByUserId(

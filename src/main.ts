@@ -1,7 +1,6 @@
 import { ClassSerializerInterceptor, INestApplication } from "@nestjs/common";
 import { NestFactory, Reflector } from "@nestjs/core";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
-import * as dayjs from "dayjs";
 
 import {
   CustomValidationErrorFilter,
@@ -49,6 +48,6 @@ const bootstrap = async () => {
     origin: ["http://localhost:3000"],
   });
 
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(process.env.PORT || 3001);
 };
 bootstrap();
