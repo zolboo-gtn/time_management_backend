@@ -45,7 +45,10 @@ const bootstrap = async () => {
 
   // CORS
   app.enableCors({
-    origin: ["http://localhost:3000"],
+    origin: [
+      "http://localhost:3000",
+      "https://time-attendance-management.herokuapp.com",
+    ],
   });
 
   await app.listen(process.env.PORT || 3001);

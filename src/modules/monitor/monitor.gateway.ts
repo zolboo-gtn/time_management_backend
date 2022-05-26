@@ -10,7 +10,10 @@ import { MonitorService } from "./monitor.service";
 
 @WebSocketGateway({
   cors: {
-    origin: ["http://localhost:3000"],
+    origin: [
+      "http://localhost:3000",
+      "https://time-attendance-management.herokuapp.com",
+    ],
   },
 })
 export class MonitorGateway
