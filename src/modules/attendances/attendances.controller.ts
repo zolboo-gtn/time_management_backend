@@ -36,7 +36,7 @@ export class AttendancesController {
       cardId,
     });
     if (attendance === null) {
-      await this.monitorService.unregisteredCard({ cardId });
+      await this.monitorService.nonRegisteredCard({ cardId });
       return;
     }
 
