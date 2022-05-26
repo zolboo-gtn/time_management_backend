@@ -10,4 +10,7 @@ export class MonitorService {
   async notifyMonitors(data: AddTimestampByCardIdDto) {
     this.server?.emit("notify_monitors", data);
   }
+  async unregisteredCard(data: Omit<AddTimestampByCardIdDto, "timestamp">) {
+    this.server?.emit("unregistered_card", data);
+  }
 }

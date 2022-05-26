@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { Attendance } from "@prisma/client";
 import * as dayjs from "dayjs";
 
 import { PrismaService } from "modules/prisma";
@@ -26,15 +27,19 @@ export class AttendancesService {
   async update(id: number, data: UpdateAttendanceDto) {
     await this.prisma.attendance.update({ data, where: { id } });
   }
-  async addTimestampByCardId({ timestamp, cardId }: AddTimestampByCardIdDto) {
+  async addTimestampByCardId({
+    timestamp,
+    cardId,
+  }: AddTimestampByCardIdDto): Promise<Attendance | null> {
     const today = dayjs().startOf("day").toDate();
     const user = await this.prisma.user.findUnique({
       where: {
         cardId,
       },
     });
+    // card is not registered
     if (!user) {
-      throw new NotFoundException();
+      return null;
     }
     const attendance = await this.prisma.attendance.findFirst({
       where: {
@@ -45,7 +50,7 @@ export class AttendancesService {
       },
     });
 
-    await this.prisma.attendance.upsert({
+    return await this.prisma.attendance.upsert({
       update: {
         timestamps: {
           push: timestamp,

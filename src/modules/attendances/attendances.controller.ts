@@ -31,12 +31,16 @@ export class AttendancesController {
   async addTimestampByCardId(
     @Body() { timestamp, cardId }: AddTimestampByCardIdDto,
   ) {
-    await this.attendancesService.addTimestampByCardId({
+    const attendance = await this.attendancesService.addTimestampByCardId({
       timestamp,
       cardId,
     });
-    await this.monitorService.notifyMonitors({ timestamp, cardId });
+    if (attendance === null) {
+      await this.monitorService.unregisteredCard({ cardId });
+      return;
+    }
 
+    await this.monitorService.notifyMonitors({ timestamp, cardId });
     return;
   }
   @Patch("/addTimestampByUserId")
