@@ -4,6 +4,7 @@ import * as bcrypt from "bcrypt";
 import { PrismaService } from "modules/prisma";
 import { CreateUserDto, SearchUsersDto, UpdateUserDto } from "./dtos";
 import { UserEntity } from "./entities/user.entity";
+import { PaginationDto } from "common/pagination.dto";
 
 @Injectable()
 export class UsersService {
@@ -32,6 +33,8 @@ export class UsersService {
     role,
     sortingField,
     sortingOrder,
+    page,
+    perPage,
   }: SearchUsersDto) {
     const users = await this.prisma.user.findMany({
       where: {
@@ -43,7 +46,17 @@ export class UsersService {
       orderBy: sortingField ? { [sortingField]: sortingOrder } : undefined,
     });
 
-    return UserEntity.usersFromJson(users);
+    const currentPage = page ?? 1;
+    const perPageNumber = perPage ?? 50;
+    const totalCount = users.length;
+
+    return new PaginationDto({
+      users: UserEntity.usersFromJson(users),
+      currentPage: currentPage,
+      perPage: perPageNumber,
+      totalPage: Math.ceil(totalCount / perPageNumber),
+      itemTotalCount: totalCount,
+    });
   }
   async findOneById(id: number) {
     const user = await this.prisma.user.findUnique({

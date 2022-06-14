@@ -1,5 +1,8 @@
+import { ApiPropertyOptional } from "@nestjs/swagger";
 import { Role } from "@prisma/client";
-import { IsOptional, IsString, IsEnum } from "class-validator";
+
+import { Type } from "class-transformer";
+import { IsOptional, IsString, IsEnum, IsInt } from "class-validator";
 
 import { SortingOrder } from "common/enums";
 import { SortingField } from "modules/users/enums";
@@ -40,4 +43,16 @@ export class SearchUsersDto {
   })
   @IsOptional()
   readonly sortingOrder?: SortingOrder;
+
+  @ApiPropertyOptional({ type: Number, nullable: true, example: 1 })
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  readonly page?: number | null;
+
+  @ApiPropertyOptional({ type: Number, nullable: true, example: 20 })
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  readonly perPage?: number | null;
 }
