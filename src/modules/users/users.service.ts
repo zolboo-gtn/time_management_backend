@@ -51,7 +51,7 @@ export class UsersService {
     const totalCount = users.length;
 
     return new PaginationDto({
-      users: UserEntity.usersFromJson(users),
+      items: UserEntity.usersFromJson(users),
       currentPage: currentPage,
       perPage: perPageNumber,
       totalPage: Math.ceil(totalCount / perPageNumber),

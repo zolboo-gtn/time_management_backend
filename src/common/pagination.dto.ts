@@ -1,8 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 
 export class PaginationDto {
-  @ApiProperty({ example: ["users"] })
-  users: any;
+  @ApiProperty({ example: ["items"] })
+  items: any;
 
   @ApiProperty({ example: 1 })
   currentPage!: number;
