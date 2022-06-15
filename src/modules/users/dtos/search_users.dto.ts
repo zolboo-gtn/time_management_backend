@@ -48,11 +48,11 @@ export class SearchUsersDto {
   @IsOptional()
   @IsInt()
   @Type(() => Number)
-  readonly page?: number | null;
+  readonly page?: number;
 
   @ApiPropertyOptional({ type: Number, nullable: true, example: 20 })
   @IsOptional()
   @IsInt()
   @Type(() => Number)
-  readonly perPage?: number | null;
+  readonly perPage?: number;
 }

@@ -1,8 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 
-export class PaginationDto {
+export class PaginationDto<T> {
   @ApiProperty({ example: ["items"] })
-  items: any;
+  items: T;
 
   @ApiProperty({ example: 1 })
   currentPage!: number;
@@ -22,7 +22,7 @@ export class PaginationDto {
   @ApiProperty({ example: 1 })
   totalItems!: number;
 
-  constructor(dto: PaginationDto) {
+  constructor(dto: PaginationDto<T>) {
     Object.assign(this, dto);
   }
 }
