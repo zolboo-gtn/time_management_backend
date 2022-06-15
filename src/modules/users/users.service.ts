@@ -47,7 +47,7 @@ export class UsersService {
     });
 
     const currentPage = page ?? 1;
-    const perPageNumber = perPage ?? 50;
+    const perPageNumber = perPage ?? 30;
     const totalCount = users.length;
     const nextPage = currentPage < users.length ? currentPage + 1 : null;
     const prevPage = currentPage > 1 ? currentPage - 1 : null;
