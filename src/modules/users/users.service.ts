@@ -36,7 +36,7 @@ export class UsersService {
     sortingOrder,
     page = 1,
     perPage = 30,
-  }: SearchUsersDto): Promise<PaginationDto<UserEntity[]>> {
+  }: SearchUsersDto): Promise<PaginationDto<UserEntity>> {
     const users = await this.prisma.user.findMany({
       where: {
         cardId: { contains: cardId },
@@ -47,13 +47,16 @@ export class UsersService {
       orderBy: sortingField ? { [sortingField]: sortingOrder } : undefined,
     });
 
+    const skip = perPage * (page - 1);
+    const paginated = users.slice(skip, page * perPage);
+
     const totalCount = users.length;
     const totalPages = Math.ceil(totalCount / perPage);
     const nextPage = page < totalPages ? page + 1 : null;
     const prevPage = page > 1 ? page - 1 : null;
 
     return {
-      items: UserEntity.usersFromJson(users),
+      items: UserEntity.usersFromJson(paginated),
       nextPage: nextPage,
       prevPage: prevPage,
       currentPage: page,
