@@ -49,13 +49,17 @@ export class UsersService {
     const currentPage = page ?? 1;
     const perPageNumber = perPage ?? 50;
     const totalCount = users.length;
+    const nextPage = currentPage < users.length ? currentPage + 1 : null;
+    const prevPage = currentPage > 1 ? currentPage - 1 : null;
 
     return new PaginationDto({
       items: UserEntity.usersFromJson(users),
+      nextPage: nextPage,
+      prevPage: prevPage,
       currentPage: currentPage,
       perPage: perPageNumber,
-      totalPage: Math.ceil(totalCount / perPageNumber),
-      itemTotalCount: totalCount,
+      totalPages: Math.ceil(totalCount / perPageNumber),
+      totalItems: totalCount,
     });
   }
   async findOneById(id: number) {

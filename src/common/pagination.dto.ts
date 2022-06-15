@@ -8,13 +8,19 @@ export class PaginationDto {
   currentPage!: number;
 
   @ApiProperty({ example: 1 })
+  nextPage!: number | null;
+
+  @ApiProperty({ example: 1 })
+  prevPage!: number | null;
+
+  @ApiProperty({ example: 1 })
   perPage!: number;
 
   @ApiProperty({ example: 1 })
-  totalPage!: number;
+  totalPages!: number;
 
   @ApiProperty({ example: 1 })
-  itemTotalCount!: number;
+  totalItems!: number;
 
   constructor(dto: PaginationDto) {
     Object.assign(this, dto);
