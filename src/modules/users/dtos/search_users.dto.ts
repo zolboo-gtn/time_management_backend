@@ -44,13 +44,13 @@ export class SearchUsersDto {
   @IsOptional()
   readonly sortingOrder?: SortingOrder;
 
-  @ApiPropertyOptional({ type: Number, nullable: true, example: 1 })
+  @ApiPropertyOptional({ type: Number, example: 1 })
   @IsOptional()
   @IsInt()
   @Type(() => Number)
   readonly page?: number;
 
-  @ApiPropertyOptional({ type: Number, nullable: true, example: 20 })
+  @ApiPropertyOptional({ type: Number, example: 20 })
   @IsOptional()
   @IsInt()
   @Type(() => Number)
