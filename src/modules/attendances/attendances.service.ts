@@ -90,7 +90,13 @@ export class AttendancesService {
   async remove(id: number) {
     await this.prisma.attendance.delete({ where: { id } });
   }
-  async getUserAttendance({ userId, startDate, endDate }: UserAttendanceDto) {
+  async getUserAttendance({
+    userId,
+    startDate,
+    endDate,
+    page = 1,
+    perPage = 30,
+  }: UserAttendanceDto) {
     const attendance = await this.prisma.attendance.findMany({
       where: {
         userId,
@@ -101,6 +107,22 @@ export class AttendancesService {
       },
     });
 
-    return attendance;
+    const skip = perPage * (page - 1);
+    const paginated = attendance.slice(skip, page * perPage);
+
+    const totalCount = attendance.length;
+    const totalPages = Math.ceil(totalCount / perPage);
+    const nextPage = page < totalPages ? page + 1 : null;
+    const prevPage = page > 1 ? page - 1 : null;
+
+    return {
+      items: paginated,
+      nextPage: nextPage,
+      prevPage: prevPage,
+      currentPage: page,
+      perPage: perPage,
+      totalPages: totalPages,
+      totalItems: totalCount,
+    };
   }
 }
