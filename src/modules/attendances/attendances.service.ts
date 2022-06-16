@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { Attendance } from "@prisma/client";
+import { PaginationDto } from "common/dtos";
 import * as dayjs from "dayjs";
 
 import { PrismaService } from "modules/prisma";
@@ -96,7 +97,7 @@ export class AttendancesService {
     endDate,
     page = 1,
     perPage = 30,
-  }: UserAttendanceDto) {
+  }: UserAttendanceDto): Promise<PaginationDto<Attendance>> {
     const attendance = await this.prisma.attendance.findMany({
       where: {
         userId,
