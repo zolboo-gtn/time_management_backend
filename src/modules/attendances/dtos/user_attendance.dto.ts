@@ -1,3 +1,5 @@
+import { ApiPropertyOptional } from "@nestjs/swagger";
+
 import { Type } from "class-transformer";
 import { IsInt, IsDateString, IsOptional, Validate } from "class-validator";
 
@@ -22,4 +24,16 @@ export class UserAttendanceDto {
   })
   @IsOptional()
   readonly endDate?: string;
+
+  @ApiPropertyOptional({ type: Number, example: 1 })
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  readonly page?: number;
+
+  @ApiPropertyOptional({ type: Number, example: 20 })
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  readonly perPage?: number;
 }
