@@ -95,6 +95,8 @@ export class AttendancesService {
     userId,
     startDate,
     endDate,
+    sortingField,
+    sortingOrder,
     page = 1,
     perPage = 30,
   }: UserAttendanceDto): Promise<PaginationDto<Attendance>> {
@@ -106,6 +108,7 @@ export class AttendancesService {
           lte: endDate ? new Date(endDate) : undefined,
         },
       },
+      orderBy: sortingField ? { [sortingField]: sortingOrder } : undefined,
     });
 
     const skip = perPage * (page - 1);
