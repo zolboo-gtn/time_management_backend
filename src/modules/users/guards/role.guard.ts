@@ -32,17 +32,18 @@ export const JwtRoleGuard = (
         .switchToHttp()
         .getRequest<IRequestWithUser>();
 
+      //
+      if (requiredRoles.some((role) => user.role === role)) {
+        return true;
+      }
+
       // OWNER
       if (requiredRoles.includes("OWNER")) {
-        // if (route["path"] === "/users/:id") {
-        //   const resource = await this.usersService.findOneById(+params.id);
-        //   return resource.id === user.id;
-        // }
         const resource = await this.usersService.findOneById(+params.id);
         return resource.id === user.id;
       }
 
-      return requiredRoles.some((role) => user.role === role);
+      return false;
     }
   }
 
