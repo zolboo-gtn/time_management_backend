@@ -5,6 +5,8 @@ import { PrismaService } from "modules/prisma";
 import { CreateUserDto, SearchUsersDto, UpdateUserDto } from "./dtos";
 import { UserEntity } from "./entities/user.entity";
 
+import { PaginationDto } from "common/dtos";
+
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
@@ -32,7 +34,9 @@ export class UsersService {
     role,
     sortingField,
     sortingOrder,
-  }: SearchUsersDto) {
+    page = 1,
+    perPage = 30,
+  }: SearchUsersDto): Promise<PaginationDto<UserEntity>> {
     const users = await this.prisma.user.findMany({
       where: {
         cardId: { contains: cardId },
@@ -43,7 +47,23 @@ export class UsersService {
       orderBy: sortingField ? { [sortingField]: sortingOrder } : undefined,
     });
 
-    return UserEntity.usersFromJson(users);
+    const skip = perPage * (page - 1);
+    const paginated = users.slice(skip, page * perPage);
+
+    const totalCount = users.length;
+    const totalPages = Math.ceil(totalCount / perPage);
+    const nextPage = page < totalPages ? page + 1 : null;
+    const prevPage = page > 1 ? page - 1 : null;
+
+    return {
+      items: UserEntity.usersFromJson(paginated),
+      nextPage: nextPage,
+      prevPage: prevPage,
+      currentPage: page,
+      perPage: perPage,
+      totalPages: totalPages,
+      totalItems: totalCount,
+    };
   }
   async findOneById(id: number) {
     const user = await this.prisma.user.findUnique({
