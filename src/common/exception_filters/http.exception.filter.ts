@@ -14,17 +14,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const status = exception.getStatus();
 
     console.debug("HttpExceptionFilter", exception);
 
     const errorResponse: ICustomError = {
-      statusCode: status,
+      statusCode: exception.getStatus(),
       timestamp: new Date().toISOString(),
       path: request.url,
       code: exception.name,
       message: exception.message,
     };
-    response.status(status).json(errorResponse);
+    response.status(errorResponse.statusCode).json(errorResponse);
   }
 }

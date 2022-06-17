@@ -34,10 +34,9 @@ export class PrismaErrorFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const status = HttpStatus.BAD_REQUEST;
 
     let errorResponse: ICustomError = {
-      statusCode: status,
+      statusCode: HttpStatus.BAD_REQUEST,
       timestamp: new Date().toISOString(),
       path: request.url,
     };
@@ -51,6 +50,10 @@ export class PrismaErrorFilter implements ExceptionFilter {
       });
     } else if (error instanceof PrismaClientKnownRequestError) {
       errorResponse = produce(errorResponse, (draft) => {
+        // https://www.prisma.io/docs/reference/api-reference/error-reference#p2025
+        if (error.code === "P2025") {
+          draft.statusCode = HttpStatus.NOT_FOUND;
+        }
         draft.code = error.code;
         draft.message = error.message;
       });
@@ -64,6 +67,6 @@ export class PrismaErrorFilter implements ExceptionFilter {
       });
     }
 
-    response.status(status).json(errorResponse);
+    response.status(errorResponse.statusCode).json(errorResponse);
   }
 }

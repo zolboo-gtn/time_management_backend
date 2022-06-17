@@ -15,11 +15,10 @@ export class CustomValidationErrorFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const status = HttpStatus.BAD_REQUEST;
 
     const { errors } = error;
     const errorResponse: ICustomError = {
-      statusCode: status,
+      statusCode: HttpStatus.BAD_REQUEST,
       timestamp: new Date().toISOString(),
       path: request.url,
       code: Object.values(
@@ -27,6 +26,6 @@ export class CustomValidationErrorFilter implements ExceptionFilter {
       ).find((value) => value),
     };
 
-    response.status(status).json(errorResponse);
+    response.status(errorResponse.statusCode).json(errorResponse);
   }
 }
