@@ -13,6 +13,7 @@ import { MonitorService } from "./monitor.service";
     origin: [
       "http://localhost:3000",
       "https://time-attendance-management.herokuapp.com",
+      "https://time-management-screen-monitor.herokuapp.com",
     ],
   },
 })
