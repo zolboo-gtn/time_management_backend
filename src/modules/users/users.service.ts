@@ -48,6 +48,7 @@ export class UsersService {
     });
 
     const skip = perPage * (page - 1);
+    // TODO: slice vs count()
     const paginated = users.slice(skip, page * perPage);
 
     const totalCount = users.length;

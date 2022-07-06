@@ -112,6 +112,7 @@ export class AttendancesService {
     });
 
     const skip = perPage * (page - 1);
+    // TODO: slice vs count()
     const paginated = attendance.slice(skip, page * perPage);
 
     const totalCount = attendance.length;
