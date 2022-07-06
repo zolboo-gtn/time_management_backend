@@ -150,18 +150,27 @@ export class AttendancesService {
     });
 
     const totalWorkDay = items.length;
-    let totalOverTime = 0;
     const totalWorkHour = items.reduce((total, value) => {
       if (value.timestamps.length > 1) {
         const first = value.timestamps[0];
         const last = value.timestamps[value.timestamps.length - 1];
-        const diff = dayjs(last).diff(dayjs(first), "hour");
+        const diffInMinutes = dayjs(last).diff(dayjs(first), "minute");
 
-        if (diff > 8) {
-          totalOverTime += diff - 8;
+        return total + diffInMinutes;
+      }
+      return total;
+    }, 0);
+    const totalOverTime = items.reduce((total, value) => {
+      if (value.timestamps.length > 1) {
+        const first = value.timestamps[0];
+        const last = value.timestamps[value.timestamps.length - 1];
+        const diffInMinutes = dayjs(last).diff(dayjs(first), "minute");
+
+        if (diffInMinutes > 8 * 60) {
+          return total + diffInMinutes - 8 * 60;
         }
 
-        return total + diff;
+        return total + diffInMinutes;
       }
       return total;
     }, 0);
