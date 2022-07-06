@@ -15,6 +15,7 @@ import { AttendancesService } from "./attendances.service";
 import {
   AddTimestampByCardIdDto,
   AddTimestampByUserIdDto,
+  MonthlyAttendanceDto,
   UpdateAttendanceDto,
   UserAttendanceDto,
 } from "./dtos";
@@ -43,6 +44,7 @@ export class AttendancesController {
     await this.monitorService.notifyMonitors({ timestamp, cardId });
     return;
   }
+
   @Patch("/addTimestampByUserId")
   async addTimestampByUserId(
     @Body() { timestamp, userId }: AddTimestampByUserIdDto,
@@ -73,6 +75,12 @@ export class AttendancesController {
   @UseGuards(JwtRoleGuard("ADMIN"))
   @Get("/userAttendance")
   async getUserAttendance(@Query() query: UserAttendanceDto) {
+    return await this.attendancesService.getUserAttendance(query);
+  }
+
+  @UseGuards(JwtRoleGuard("ADMIN"))
+  @Get("/monthlyAttendance")
+  async getMonthlyAttendance(@Query() query: MonthlyAttendanceDto) {
     return await this.attendancesService.getUserAttendance(query);
   }
 }

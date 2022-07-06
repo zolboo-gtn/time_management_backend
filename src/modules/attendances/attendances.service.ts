@@ -7,6 +7,7 @@ import { PrismaService } from "modules/prisma";
 import {
   AddTimestampByCardIdDto,
   AddTimestampByUserIdDto,
+  MonthlyAttendanceDto,
   UpdateAttendanceDto,
   UserAttendanceDto,
 } from "./dtos";
@@ -128,6 +129,47 @@ export class AttendancesService {
       perPage: perPage,
       totalPages: totalPages,
       totalItems: totalCount,
+    };
+  }
+
+  async getMonthlyAttendance({ date, userId }: MonthlyAttendanceDto): Promise<{
+    totalWorkDay: number;
+    totalWorkHour: number;
+    totalOverTime: number;
+  }> {
+    const startOfMonth = dayjs(date ?? new Date()).startOf("month");
+    const endOfMonth = startOfMonth.add(1, "month");
+    const items = await this.prisma.attendance.findMany({
+      where: {
+        userId,
+        createdAt: {
+          gte: startOfMonth.toDate(),
+          lt: endOfMonth.toDate(),
+        },
+      },
+    });
+
+    const totalWorkDay = items.length;
+    let totalOverTime = 0;
+    const totalWorkHour = items.reduce((total, value) => {
+      if (value.timestamps.length > 1) {
+        const first = value.timestamps[0];
+        const last = value.timestamps[value.timestamps.length - 1];
+        const diff = dayjs(last).diff(dayjs(first), "hour");
+
+        if (diff > 8) {
+          totalOverTime += diff - 8;
+        }
+
+        return total + diff;
+      }
+      return total;
+    }, 0);
+
+    return {
+      totalWorkDay,
+      totalWorkHour,
+      totalOverTime,
     };
   }
 }
