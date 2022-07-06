@@ -19,7 +19,12 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post("login")
   async login(@RequestUser() user: UserEntity) {
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      role: user.role,
+      name: user.name,
+    };
     return {
       accessToken: this.jwtService.sign(payload),
     };
@@ -29,7 +34,12 @@ export class AuthController {
   async register(@Body() data: CreateUserDto) {
     const user = await this.usersService.create(data);
 
-    const payload = { email: user.email, sub: user.id, role: user.role };
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      role: user.role,
+      name: user.name,
+    };
     return {
       accessToken: this.jwtService.sign(payload),
     };
