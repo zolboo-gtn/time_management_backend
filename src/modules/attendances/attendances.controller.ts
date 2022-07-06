@@ -81,6 +81,6 @@ export class AttendancesController {
   @UseGuards(JwtRoleGuard("ADMIN"))
   @Get("/monthlyAttendance")
   async getMonthlyAttendance(@Query() query: MonthlyAttendanceDto) {
-    return await this.attendancesService.getUserAttendance(query);
+    return await this.attendancesService.getMonthlyAttendance(query);
   }
 }
