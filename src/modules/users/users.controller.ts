@@ -18,6 +18,7 @@ import { UsersService } from "./users.service";
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @UseGuards(JwtRoleGuard("ADMIN"))
   @Get()
   async findAll(@Query() query: SearchUsersDto) {
     return await this.usersService.findAll(query);
