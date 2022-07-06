@@ -137,8 +137,14 @@ export class AttendancesService {
     totalWorkTime: number;
     totalOverTime: number;
   }> {
-    const startOfMonth = dayjs(date ?? new Date()).startOf("month");
+    const now = dayjs(date ?? new Date());
+    const startOfMonth = now
+      .subtract(now.date() > 25 ? 0 : 1, "month")
+      .set("date", 25)
+      .set("hour", 16)
+      .startOf("hour");
     const endOfMonth = startOfMonth.add(1, "month");
+
     const items = await this.prisma.attendance.findMany({
       where: {
         userId,
