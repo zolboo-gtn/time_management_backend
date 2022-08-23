@@ -21,9 +21,23 @@ model User {
   cardId     String       @unique
   hash       String
   attendance Attendance[]
+  cardAttendance  CardAttendance[]
 }
 
 model Attendance {
+  id         Int        @id @default(autoincrement())
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  //
+  start      DateTime   @default(now())
+  end        DateTime?
+  user       User       @relation(fields: [userId], references: [id])
+  userId     Int
+  type       AttendanceType     @default(REMOTE)
+  status     AttendanceStatus   @default(APPROVED)
+}
+
+model CardAttendance {
   id         Int        @id @default(autoincrement())
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
@@ -36,4 +50,20 @@ model Attendance {
 enum Role {
   ADMIN
   USER
+}
+
+enum AttendanceType {
+  REMOTE
+  OFFICE
+  HOLIDAY
+  DAYOFF
+  SICK
+  ABSENT
+}
+
+enum AttendanceStatus {
+  APPROVED
+  DECLINED
+  PENDING
+  CANCELED
 }
