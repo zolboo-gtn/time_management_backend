@@ -1,14 +1,18 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { Attendance } from "@prisma/client";
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { Attendance, AttendanceType, CardAttendance } from "@prisma/client";
 import { PaginationDto } from "common/dtos";
 import * as dayjs from "dayjs";
 
 import { PrismaService } from "modules/prisma";
 import {
   AddTimestampByCardIdDto,
-  AddTimestampByUserIdDto,
   MonthlyAttendanceDto,
-  UpdateAttendanceDto,
+  UpdateCardAttendanceDto,
   UserAttendanceDto,
 } from "./dtos";
 
@@ -26,13 +30,83 @@ export class AttendancesService {
 
     return attendance;
   }
-  async update(id: number, data: UpdateAttendanceDto) {
-    await this.prisma.attendance.update({ data, where: { id } });
+
+  async startWork({ type, userId }: { type: AttendanceType; userId: number }) {
+    const today = dayjs().startOf("day").toDate();
+    const tommorrow = dayjs().add(1, "day").startOf("day").toDate();
+
+    // Өнөөдөр ажил аль хэдийн эхэлчихсэн дуусгаагүй байгаа бол дахиж үүсгэх боломжгүй байна. Буюу өмнөх ажлын цагаа дуусгасны дараа дахиж үүсгэх боломжтой байна.
+    const beforeStarted = await this.prisma.attendance.findFirst({
+      where: {
+        userId,
+        AND: [
+          {
+            start: {
+              gte: today,
+            },
+          },
+          {
+            start: {
+              lte: tommorrow,
+            },
+          },
+          {
+            end: null,
+          },
+        ],
+      },
+    });
+    if (beforeStarted)
+      throw new HttpException(
+        `Today's work has already started.`,
+        HttpStatus.BAD_REQUEST,
+      );
+
+    return await this.prisma.attendance.create({ data: { type, userId } });
   }
+
+  async endWork(userId: number) {
+    const today = dayjs().startOf("day").toDate();
+    const tommorrow = dayjs().add(1, "day").startOf("day").toDate();
+
+    // Ажлын цаг эхлээгүй бол дуусгах боломжгүй байна.
+    const attendance = await this.prisma.attendance.findFirstOrThrow({
+      where: {
+        userId,
+        AND: [
+          {
+            start: {
+              gte: today,
+            },
+          },
+          {
+            start: {
+              lte: tommorrow,
+            },
+          },
+          {
+            end: null,
+          },
+        ],
+      },
+    });
+
+    return await this.prisma.attendance.update({
+      where: {
+        id: attendance.id,
+      },
+      data: { end: dayjs().toISOString() },
+    });
+  }
+
+  async updateCardAttendance(id: number, data: UpdateCardAttendanceDto) {
+    await this.prisma.cardAttendance.update({ data, where: { id } });
+  }
+
   async addTimestampByCardId({
     timestamp,
     cardId,
-  }: AddTimestampByCardIdDto): Promise<Attendance | null> {
+  }: AddTimestampByCardIdDto): Promise<CardAttendance | null> {
     const today = dayjs().startOf("day").toDate();
     const user = await this.prisma.user.findUnique({
       where: {
@@ -43,7 +117,7 @@ export class AttendancesService {
     if (!user) {
       return null;
     }
-    const attendance = await this.prisma.attendance.findFirst({
+    const attendance = await this.prisma.cardAttendance.findFirst({
       where: {
         userId: user.id,
         createdAt: {
@@ -52,7 +126,7 @@ export class AttendancesService {
       },
     });
 
-    return await this.prisma.attendance.upsert({
+    return await this.prisma.cardAttendance.upsert({
       update: {
         timestamps: {
           push: timestamp,
@@ -65,33 +139,11 @@ export class AttendancesService {
       where: { id: attendance?.id ?? -1 },
     });
   }
-  async addTimestampByUserId({ timestamp, userId }: AddTimestampByUserIdDto) {
-    const today = dayjs().startOf("day").toDate();
-    const attendance = await this.prisma.attendance.findFirst({
-      where: {
-        userId,
-        createdAt: {
-          gte: today,
-        },
-      },
-    });
 
-    await this.prisma.attendance.upsert({
-      update: {
-        timestamps: {
-          push: timestamp,
-        },
-      },
-      create: {
-        timestamps: [timestamp],
-        userId,
-      },
-      where: { id: attendance?.id ?? -1 },
-    });
-  }
   async remove(id: number) {
     await this.prisma.attendance.delete({ where: { id } });
   }
+
   async getUserAttendance({
     userId,
     startDate,
@@ -157,26 +209,26 @@ export class AttendancesService {
 
     const totalWorkDay = items.length;
     const totalWorkTime = items.reduce((total, value) => {
-      if (value.timestamps.length > 1) {
-        const first = value.timestamps[0];
-        const last = value.timestamps[value.timestamps.length - 1];
-        const diffInMinutes = dayjs(last).diff(dayjs(first), "minute");
+      // if (value.timestamps.length > 1) {
+      //   const first = value.timestamps[0];
+      //   const last = value.timestamps[value.timestamps.length - 1];
+      //   const diffInMinutes = dayjs(last).diff(dayjs(first), "minute");
 
-        return total + diffInMinutes;
-      }
+      //   return total + diffInMinutes;
+      // }
       return total;
     }, 0);
     const totalOverTime = items.reduce((total, value) => {
-      if (value.timestamps.length > 1) {
-        const first = value.timestamps[0];
-        const last = value.timestamps[value.timestamps.length - 1];
-        const diffInMinutes = dayjs(last).diff(dayjs(first), "minute");
-        const overTime = diffInMinutes - 8 * 60;
+      // if (value.timestamps.length > 1) {
+      //   const first = value.timestamps[0];
+      //   const last = value.timestamps[value.timestamps.length - 1];
+      //   const diffInMinutes = dayjs(last).diff(dayjs(first), "minute");
+      //   const overTime = diffInMinutes - 8 * 60;
 
-        if (overTime > 0) {
-          return total + overTime;
-        }
-      }
+      //   if (overTime > 0) {
+      //     return total + overTime;
+      //   }
+      // }
       return total;
     }, 0);
 

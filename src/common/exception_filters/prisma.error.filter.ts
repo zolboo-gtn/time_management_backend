@@ -10,6 +10,7 @@ import {
   PrismaClientKnownRequestError,
   PrismaClientInitializationError,
   PrismaClientUnknownRequestError,
+  NotFoundError,
 } from "@prisma/client/runtime";
 import { Request, Response } from "express";
 import produce from "immer";
@@ -21,13 +22,15 @@ type PrismaError =
   | PrismaClientValidationError
   | PrismaClientKnownRequestError
   | PrismaClientInitializationError
-  | PrismaClientUnknownRequestError;
+  | PrismaClientUnknownRequestError
+  | NotFoundError;
 @Catch(
   PrismaClientRustPanicError,
   PrismaClientValidationError,
   PrismaClientKnownRequestError,
   PrismaClientInitializationError,
   PrismaClientUnknownRequestError,
+  NotFoundError,
 )
 export class PrismaErrorFilter implements ExceptionFilter {
   catch(error: PrismaError, host: ArgumentsHost) {
