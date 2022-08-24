@@ -5,3 +5,8 @@ export { UpdateCardAttendanceDto } from "./update_attendance.dto";
 export { UserAttendanceDto } from "./user_attendance.dto";
 
 export { StartWorkDto } from "./start_work.dto";
+export {
+  UpdateRequestDto,
+  ApproveRequestDto,
+  SendRequestDto,
+} from "./send_request.dto";

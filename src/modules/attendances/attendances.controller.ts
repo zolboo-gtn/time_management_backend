@@ -20,12 +20,16 @@ import { MonitorService } from "modules/monitor";
 import { AttendancesService } from "./attendances.service";
 import {
   AddTimestampByCardIdDto,
+  ApproveRequestDto,
   MonthlyAttendanceDto,
+  SendRequestDto,
   StartWorkDto,
   UpdateCardAttendanceDto,
+  UpdateRequestDto,
   UserAttendanceDto,
 } from "./dtos";
 import { JwtRoleGuard } from "./guards";
+import { OwnerGuard } from "./guards/owner.guard";
 
 @Controller("attendances")
 export class AttendancesController {
@@ -68,11 +72,54 @@ export class AttendancesController {
     });
   }
 
+  /**
+   * Ажлийн цагийг дуусгах.
+   * @param req
+   * @returns
+   */
   @Patch("/end")
   @UseGuards(JwtAuthGuard)
   @UseFilters(new PrismaErrorFilter())
   async endWork(@Req() req: any) {
     return await this.attendancesService.endWork(+req.user.id);
+  }
+
+  /**
+   * Чөлөө, өвчтэй, амралтын хүсэлт илгээх
+   * @param data
+   * @param req
+   */
+  @Post("/request-send")
+  @UseGuards(JwtAuthGuard)
+  async requestSend(@Body() data: SendRequestDto, @Req() req: any) {
+    return await this.attendancesService.sendRequest(data, +req.user.id);
+  }
+
+  /**
+   * Ажилтан өөрийн илгээсэн хүсэлтийг засах.
+   * :id is attendanceId
+   * @param data
+   * @param req
+   * @returns
+   */
+  @Patch("/request-update/:id")
+  @UseGuards(JwtAuthGuard, OwnerGuard)
+  async requestUpdate(
+    @Body() data: UpdateRequestDto,
+    @Param("id", ParseIntPipe) id: number,
+    @Req() req: any,
+  ) {
+    return await this.attendancesService.updateRequest(data, id);
+  }
+
+  @Patch("/request-approve/:id")
+  @UseGuards(JwtAuthGuard, JwtRoleGuard("ADMIN"))
+  async requestApprove(
+    @Body() data: ApproveRequestDto,
+    @Param("id", ParseIntPipe) id: number,
+    @Req() req: any,
+  ) {
+    return await this.attendancesService.approveRequest(data, id, +req.user.id);
   }
 
   @UseGuards(JwtRoleGuard("ADMIN"))

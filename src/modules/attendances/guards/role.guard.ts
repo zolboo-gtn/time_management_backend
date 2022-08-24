@@ -14,10 +14,6 @@ import { AttendancesService } from "modules/attendances/attendances.service";
 export const JwtRoleGuard = (...requiredRoles: Role[]): Type<CanActivate> => {
   @Injectable()
   class JwtRoleGuardMixin extends JwtAuthGuard {
-    constructor(private readonly attendancesService: AttendancesService) {
-      super();
-    }
-
     async canActivate(context: ExecutionContext): Promise<boolean> {
       await super.canActivate(context);
 

@@ -11,8 +11,11 @@ import * as dayjs from "dayjs";
 import { PrismaService } from "modules/prisma";
 import {
   AddTimestampByCardIdDto,
+  ApproveRequestDto,
   MonthlyAttendanceDto,
+  SendRequestDto,
   UpdateCardAttendanceDto,
+  UpdateRequestDto,
   UserAttendanceDto,
 } from "./dtos";
 
@@ -96,6 +99,42 @@ export class AttendancesService {
         id: attendance.id,
       },
       data: { end: dayjs().toISOString() },
+    });
+  }
+
+  async sendRequest(data: SendRequestDto, userId: number) {
+    return await this.prisma.attendance.create({
+      data: {
+        ...data,
+        userId,
+        status: "PENDING",
+      },
+    });
+  }
+
+  async updateRequest(data: UpdateRequestDto, id: number) {
+    return await this.prisma.attendance.update({
+      where: {
+        id: +id,
+      },
+      data,
+    });
+  }
+
+  async approveRequest(
+    data: ApproveRequestDto,
+    id: number,
+    approvedById: number,
+  ) {
+    return await this.prisma.attendance.update({
+      where: {
+        id: +id,
+      },
+      data: {
+        ...data,
+        approvedById,
+        approvedAt: dayjs().toISOString(),
+      },
     });
   }
 
