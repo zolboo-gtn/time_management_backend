@@ -4,7 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { Attendance, AttendanceType, CardAttendance } from "@prisma/client";
+import {
+  Attendance,
+  AttendanceType,
+  CardAttendance,
+  User,
+} from "@prisma/client";
 import { PaginationDto } from "common/dtos";
 import * as dayjs from "dayjs";
 
@@ -17,6 +22,7 @@ import {
   UpdateCardAttendanceDto,
   UpdateRequestDto,
   UserAttendanceDto,
+  UsersAttendanceDto,
 } from "./dtos";
 
 @Injectable()
@@ -275,6 +281,48 @@ export class AttendancesService {
       totalWorkDay,
       totalWorkTime,
       totalOverTime,
+    };
+  }
+
+  async getUsersAttendance({
+    startDate,
+    endDate,
+    sortingField,
+    sortingOrder,
+    page = 1,
+    perPage = 30,
+  }: UsersAttendanceDto): Promise<PaginationDto<User>> {
+    const users = await this.prisma.user.findMany({
+      orderBy: sortingField ? { [sortingField]: sortingOrder } : undefined,
+      include: {
+        attendance: {
+          where: {
+            start: {
+              gte: startDate ? new Date(startDate) : undefined,
+              lte: endDate ? new Date(endDate) : undefined,
+            },
+          },
+        },
+      },
+    });
+
+    const skip = perPage * (page - 1);
+
+    const paginated = users.slice(skip, page * perPage);
+
+    const totalCount = users.length;
+    const totalPages = Math.ceil(totalCount / perPage);
+    const nextPage = page < totalPages ? page + 1 : null;
+    const prevPage = page > 1 ? page - 1 : null;
+
+    return {
+      items: paginated,
+      nextPage: nextPage,
+      prevPage: prevPage,
+      currentPage: page,
+      perPage: perPage,
+      totalPages: totalPages,
+      totalItems: totalCount,
     };
   }
 }

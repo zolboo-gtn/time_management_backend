@@ -27,6 +27,7 @@ import {
   UpdateCardAttendanceDto,
   UpdateRequestDto,
   UserAttendanceDto,
+  UsersAttendanceDto,
 } from "./dtos";
 import { JwtRoleGuard } from "./guards";
 import { OwnerGuard } from "./guards/owner.guard";
@@ -136,9 +137,14 @@ export class AttendancesController {
   @UseGuards(JwtRoleGuard("ADMIN"))
   @Delete(":id")
   async remove(@Param("id", ParseIntPipe) id: number) {
-    return await this.attendancesService.remove(id); //TODO:
+    return await this.attendancesService.remove(id);
   }
 
+  /**
+   *  Сонгосон нэг хэрэглэгчийн ирцийн мэдээлэл авах
+   * @param query
+   * @returns
+   */
   @UseGuards(JwtRoleGuard("ADMIN"))
   @Get("/userAttendance")
   async getUserAttendance(@Query() query: UserAttendanceDto) {
@@ -149,5 +155,11 @@ export class AttendancesController {
   @Get("/monthlyAttendance")
   async getMonthlyAttendance(@Query() query: MonthlyAttendanceDto) {
     return await this.attendancesService.getMonthlyAttendance(query);
+  }
+
+  @Get("/usersAttendance")
+  @UseGuards(JwtRoleGuard("ADMIN"))
+  async getUsersAttendance(@Query() query: UsersAttendanceDto) {
+    return await this.attendancesService.getUsersAttendance(query);
   }
 }
