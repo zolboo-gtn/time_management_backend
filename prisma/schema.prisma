@@ -18,7 +18,7 @@ model User {
   updatedAt      DateTime         @updatedAt
   attendance     Attendance[]
   cardAttendance CardAttendance[]
-  attendanceApprovedByUser  Attendance[] @relation("attendanceApprovedByUser")
+  attendanceEvaluatedByUser  Attendance[] @relation("attendanceEvaluatedByUser")
 }
 
 model Attendance {
@@ -31,9 +31,9 @@ model Attendance {
   type      AttendanceType   @default(REMOTE)
   status    AttendanceStatus @default(APPROVED)
   user      User             @relation(fields: [userId], references: [id])
-  approvedAt DateTime?
-  approvedById Int?
-  approvedBy  User?   @relation(name: "attendanceApprovedByUser", fields: [approvedById], references: [id])
+  evaluatedAt DateTime?
+  evaluatedById Int?
+  evaluatedBy  User?   @relation(name: "attendanceEvaluatedByUser", fields: [evaluatedById], references: [id])
 }
 
 model CardAttendance {

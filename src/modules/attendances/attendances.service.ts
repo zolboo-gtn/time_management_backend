@@ -16,7 +16,7 @@ import * as dayjs from "dayjs";
 import { PrismaService } from "modules/prisma";
 import {
   AddTimestampByCardIdDto,
-  ApproveRequestDto,
+  EvaluateRequestDto,
   MonthlyAttendanceDto,
   SendRequestDto,
   UpdateCardAttendanceDto,
@@ -25,6 +25,7 @@ import {
   UsersAttendanceDto,
 } from "./dtos";
 
+const STARTHOUR: number = 16; // timeZone +8 үед 16 цаг нь 24 цагтай тэнцэнэ.
 @Injectable()
 export class AttendancesService {
   constructor(private prisma: PrismaService) {}
@@ -41,8 +42,10 @@ export class AttendancesService {
   }
 
   async startWork({ type, userId }: { type: AttendanceType; userId: number }) {
-    const today = dayjs().startOf("day").toDate();
-    const tommorrow = dayjs().add(1, "day").startOf("day").toDate();
+    const today = dayjs()
+      .subtract(1, "day")
+      .set("hour", STARTHOUR)
+      .startOf("hour");
 
     // Өнөөдөр ажил аль хэдийн эхэлчихсэн дуусгаагүй байгаа бол дахиж үүсгэх боломжгүй байна. Буюу өмнөх ажлын цагаа дуусгасны дараа дахиж үүсгэх боломжтой байна.
     const beforeStarted = await this.prisma.attendance.findFirst({
@@ -51,12 +54,12 @@ export class AttendancesService {
         AND: [
           {
             start: {
-              gte: today,
+              gte: today.toDate(),
             },
           },
           {
             start: {
-              lte: tommorrow,
+              lt: today.add(1, "day").toDate(),
             },
           },
           {
@@ -75,8 +78,10 @@ export class AttendancesService {
   }
 
   async endWork(userId: number) {
-    const today = dayjs().startOf("day").toDate();
-    const tommorrow = dayjs().add(1, "day").startOf("day").toDate();
+    const today = dayjs()
+      .subtract(1, "day")
+      .set("hour", STARTHOUR)
+      .startOf("hour");
 
     // Ажлын цаг эхлээгүй бол дуусгах боломжгүй байна.
     const attendance = await this.prisma.attendance.findFirstOrThrow({
@@ -85,12 +90,12 @@ export class AttendancesService {
         AND: [
           {
             start: {
-              gte: today,
+              gte: today.toDate(),
             },
           },
           {
             start: {
-              lte: tommorrow,
+              lte: today.add(1, "day").toDate(),
             },
           },
           {
@@ -127,10 +132,10 @@ export class AttendancesService {
     });
   }
 
-  async approveRequest(
-    data: ApproveRequestDto,
+  async evaluateRequest(
+    data: EvaluateRequestDto,
     id: number,
-    approvedById: number,
+    evaluatedById: number,
   ) {
     return await this.prisma.attendance.update({
       where: {
@@ -138,8 +143,8 @@ export class AttendancesService {
       },
       data: {
         ...data,
-        approvedById,
-        approvedAt: dayjs().toISOString(),
+        evaluatedById,
+        evaluatedAt: dayjs().toISOString(),
       },
     });
   }
@@ -235,10 +240,11 @@ export class AttendancesService {
     totalOverTime: number;
   }> {
     const now = dayjs(date ?? new Date());
+
     const startOfMonth = now
       .subtract(now.date() > 25 ? 0 : 1, "month")
       .set("date", 25)
-      .set("hour", 16)
+      .set("hour", STARTHOUR)
       .startOf("hour");
     const endOfMonth = startOfMonth.add(1, "month");
 
@@ -254,27 +260,16 @@ export class AttendancesService {
 
     const totalWorkDay = items.length;
     const totalWorkTime = items.reduce((total, value) => {
-      // if (value.timestamps.length > 1) {
-      //   const first = value.timestamps[0];
-      //   const last = value.timestamps[value.timestamps.length - 1];
-      //   const diffInMinutes = dayjs(last).diff(dayjs(first), "minute");
+      const diffInMinutes = dayjs(value.end).diff(dayjs(value.start), "minute");
 
-      //   return total + diffInMinutes;
-      // }
-      return total;
+      return total + diffInMinutes;
     }, 0);
-    const totalOverTime = items.reduce((total, value) => {
-      // if (value.timestamps.length > 1) {
-      //   const first = value.timestamps[0];
-      //   const last = value.timestamps[value.timestamps.length - 1];
-      //   const diffInMinutes = dayjs(last).diff(dayjs(first), "minute");
-      //   const overTime = diffInMinutes - 8 * 60;
 
-      //   if (overTime > 0) {
-      //     return total + overTime;
-      //   }
-      // }
-      return total;
+    const totalOverTime = items.reduce((total, value) => {
+      const diffInMinutes = dayjs(value.end).diff(dayjs(value.start), "minute");
+      const overTime = diffInMinutes - 8 * 60;
+
+      return total + overTime;
     }, 0);
 
     return {
@@ -292,14 +287,22 @@ export class AttendancesService {
     page = 1,
     perPage = 30,
   }: UsersAttendanceDto): Promise<PaginationDto<User>> {
+    const start = dayjs(startDate ?? new Date())
+      .subtract(1, "day")
+      .set("hour", STARTHOUR)
+      .startOf("hour");
+    const end = dayjs(endDate ?? new Date())
+      .set("hour", STARTHOUR)
+      .startOf("hour");
+
     const users = await this.prisma.user.findMany({
       orderBy: sortingField ? { [sortingField]: sortingOrder } : undefined,
       include: {
         attendance: {
           where: {
             start: {
-              gte: startDate ? new Date(startDate) : undefined,
-              lte: endDate ? new Date(endDate) : undefined,
+              gte: startDate ? start.toDate() : undefined,
+              lte: endDate ? end.toDate() : undefined,
             },
           },
         },

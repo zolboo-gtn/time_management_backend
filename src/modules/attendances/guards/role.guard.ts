@@ -11,9 +11,15 @@ import { JwtAuthGuard } from "modules/auth/guards";
 import { IRequestWithUser } from "common/interfaces";
 import { AttendancesService } from "modules/attendances/attendances.service";
 
-export const JwtRoleGuard = (...requiredRoles: Role[]): Type<CanActivate> => {
+export const JwtRoleGuard = (
+  ...requiredRoles: (Role | "OWNER")[]
+): Type<CanActivate> => {
   @Injectable()
   class JwtRoleGuardMixin extends JwtAuthGuard {
+    constructor(private readonly attendancesService: AttendancesService) {
+      super();
+    }
+
     async canActivate(context: ExecutionContext): Promise<boolean> {
       await super.canActivate(context);
 
@@ -22,9 +28,21 @@ export const JwtRoleGuard = (...requiredRoles: Role[]): Type<CanActivate> => {
         return true;
       }
 
-      const { user } = context.switchToHttp().getRequest<IRequestWithUser>();
+      const { user, params } = context
+        .switchToHttp()
+        .getRequest<IRequestWithUser>();
 
-      return requiredRoles.some((role) => user.role === role);
+      if (requiredRoles.some((role) => user.role === role)) return true;
+
+      // OWNER
+      if (requiredRoles.includes("OWNER")) {
+        const attendance = await this.attendancesService.findOneById(
+          +params.id,
+        );
+        return attendance.userId === user.id;
+      }
+
+      return false;
     }
   }
 

@@ -30,7 +30,7 @@ export class UpdateRequestDto {
   readonly type: AttendanceType;
 }
 
-export class ApproveRequestDto {
+export class EvaluateRequestDto {
   @Matches(/^(APPROVED|DECLINED)$/, {
     message: "InvalidAttendanceType",
   })

@@ -13,14 +13,13 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { AttendanceType } from "@prisma/client";
-import { PrismaErrorFilter } from "common/exception_filters";
 import { JwtAuthGuard } from "modules/auth/guards";
 
 import { MonitorService } from "modules/monitor";
 import { AttendancesService } from "./attendances.service";
 import {
   AddTimestampByCardIdDto,
-  ApproveRequestDto,
+  EvaluateRequestDto,
   MonthlyAttendanceDto,
   SendRequestDto,
   StartWorkDto,
@@ -30,7 +29,8 @@ import {
   UsersAttendanceDto,
 } from "./dtos";
 import { JwtRoleGuard } from "./guards";
-import { OwnerGuard } from "./guards/owner.guard";
+import { Request } from "express";
+import { IRequestWithUser } from "common/interfaces";
 
 @Controller("attendances")
 export class AttendancesController {
@@ -66,7 +66,10 @@ export class AttendancesController {
    */
   @Post("/start")
   @UseGuards(JwtAuthGuard)
-  async startWork(@Body() { type }: StartWorkDto, @Req() req: any) {
+  async startWork(
+    @Body() { type }: StartWorkDto,
+    @Req() req: IRequestWithUser,
+  ) {
     return await this.attendancesService.startWork({
       type,
       userId: +req.user.id,
@@ -80,8 +83,7 @@ export class AttendancesController {
    */
   @Patch("/end")
   @UseGuards(JwtAuthGuard)
-  @UseFilters(new PrismaErrorFilter())
-  async endWork(@Req() req: any) {
+  async endWork(@Req() req: IRequestWithUser) {
     return await this.attendancesService.endWork(+req.user.id);
   }
 
@@ -92,7 +94,10 @@ export class AttendancesController {
    */
   @Post("/request-send")
   @UseGuards(JwtAuthGuard)
-  async requestSend(@Body() data: SendRequestDto, @Req() req: any) {
+  async requestSend(
+    @Body() data: SendRequestDto,
+    @Req() req: IRequestWithUser,
+  ) {
     return await this.attendancesService.sendRequest(data, +req.user.id);
   }
 
@@ -104,23 +109,26 @@ export class AttendancesController {
    * @returns
    */
   @Patch("/request-update/:id")
-  @UseGuards(JwtAuthGuard, OwnerGuard)
+  @UseGuards(JwtAuthGuard, JwtRoleGuard("OWNER"))
   async requestUpdate(
     @Body() data: UpdateRequestDto,
     @Param("id", ParseIntPipe) id: number,
-    @Req() req: any,
   ) {
     return await this.attendancesService.updateRequest(data, id);
   }
 
-  @Patch("/request-approve/:id")
+  @Patch("/request-evaluate/:id")
   @UseGuards(JwtAuthGuard, JwtRoleGuard("ADMIN"))
-  async requestApprove(
-    @Body() data: ApproveRequestDto,
+  async requestEvaluate(
+    @Body() data: EvaluateRequestDto,
     @Param("id", ParseIntPipe) id: number,
-    @Req() req: any,
+    @Req() req: IRequestWithUser,
   ) {
-    return await this.attendancesService.approveRequest(data, id, +req.user.id);
+    return await this.attendancesService.evaluateRequest(
+      data,
+      id,
+      +req.user.id,
+    );
   }
 
   @UseGuards(JwtRoleGuard("ADMIN"))
