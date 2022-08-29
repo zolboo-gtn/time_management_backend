@@ -158,9 +158,10 @@ export class AttendancesService {
     cardId,
   }: AddTimestampByCardIdDto): Promise<CardAttendance | null> {
     const today = dayjs().startOf("day").toDate();
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findFirst({
       where: {
         cardId,
+        deletedAt: null,
       },
     });
     // card is not registered
@@ -297,6 +298,9 @@ export class AttendancesService {
 
     const users = await this.prisma.user.findMany({
       orderBy: sortingField ? { [sortingField]: sortingOrder } : undefined,
+      where: {
+        deletedAt: null,
+      },
       include: {
         attendance: {
           where: {

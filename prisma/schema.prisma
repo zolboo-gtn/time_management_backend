@@ -19,6 +19,7 @@ model User {
   attendance     Attendance[]
   cardAttendance CardAttendance[]
   attendanceEvaluatedByUser  Attendance[] @relation("attendanceEvaluatedByUser")
+  deletedAt       DateTime?
 }
 
 model Attendance {

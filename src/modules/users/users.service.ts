@@ -6,6 +6,7 @@ import { CreateUserDto, SearchUsersDto, UpdateUserDto } from "./dtos";
 import { UserEntity } from "./entities/user.entity";
 
 import { PaginationDto } from "common/dtos";
+import dayjs from "dayjs";
 
 @Injectable()
 export class UsersService {
@@ -43,6 +44,7 @@ export class UsersService {
         email: { contains: email },
         name: { contains: name },
         role,
+        deletedAt: null,
       },
       orderBy: sortingField ? { [sortingField]: sortingOrder } : undefined,
     });
@@ -67,8 +69,8 @@ export class UsersService {
     };
   }
   async findOneById(id: number) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
+    const user = await this.prisma.user.findFirst({
+      where: { id, deletedAt: null },
     });
     if (!user) {
       throw new NotFoundException();
@@ -77,8 +79,8 @@ export class UsersService {
     return new UserEntity(user);
   }
   async findOneByEmail(email: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
+    const user = await this.prisma.user.findFirst({
+      where: { email, deletedAt: null },
     });
     if (!user) {
       throw new NotFoundException();
@@ -87,13 +89,15 @@ export class UsersService {
     return new UserEntity(user);
   }
   async update(id: number, data: UpdateUserDto) {
-    const user = await this.prisma.user.update({ data, where: { id } });
-
-    return new UserEntity(user);
+    return await this.prisma.user.updateMany({
+      data,
+      where: { id, deletedAt: null },
+    });
   }
   async remove(id: number) {
-    const user = await this.prisma.user.delete({ where: { id } });
-
-    return new UserEntity(user);
+    return await this.prisma.user.updateMany({
+      where: { id, deletedAt: null },
+      data: { deletedAt: dayjs().toDate() },
+    });
   }
 }
