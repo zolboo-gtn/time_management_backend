@@ -332,4 +332,51 @@ export class AttendancesService {
       totalItems: totalCount,
     };
   }
+
+  async pullFromCardData() {
+    const start = dayjs(new Date())
+      .subtract(1, "day")
+      .set("hour", STARTHOUR)
+      .startOf("hour");
+
+    const items = await this.prisma.cardAttendance.findMany({
+      where: {
+        createdAt: {
+          gte: start.toDate(),
+          lt: start.add(1, "day").toDate(),
+        },
+      },
+    });
+
+    items.map(async (item) => {
+      const ACCEPTEDHOUR = 9;
+      if (
+        item.timestamps.length === 2 &&
+        dayjs(item.timestamps[1]).diff(dayjs(item.timestamps[0]), "hour") >=
+          ACCEPTEDHOUR
+      ) {
+        // Normal attendance
+        await this.prisma.attendance.create({
+          data: {
+            userId: item.userId,
+            start: item.timestamps[0],
+            end: item.timestamps[1],
+            type: "OFFICE",
+          },
+        });
+      } else {
+        await this.prisma.attendance.create({
+          data: {
+            userId: item.userId,
+            start: item.timestamps[0],
+            end: item.timestamps.at(-1),
+            type: "OFFICE",
+            status: "PENDING",
+            isNormal: false,
+          },
+        });
+      }
+    });
+    return items;
+  }
 }

@@ -34,7 +34,8 @@ model Attendance {
   user      User             @relation(fields: [userId], references: [id])
   evaluatedAt DateTime?
   evaluatedById Int?
-  evaluatedBy  User?   @relation(name: "attendanceEvaluatedByUser", fields: [evaluatedById], references: [id])
+  evaluatedBy  User?          @relation(name: "attendanceEvaluatedByUser", fields: [evaluatedById], references: [id])
+  isNormal  Boolean           @default(true)
 }
 
 model CardAttendance {

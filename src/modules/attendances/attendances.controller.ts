@@ -29,7 +29,6 @@ import {
   UsersAttendanceDto,
 } from "./dtos";
 import { JwtRoleGuard } from "./guards";
-import { Request } from "express";
 import { IRequestWithUser } from "common/interfaces";
 
 @Controller("attendances")
