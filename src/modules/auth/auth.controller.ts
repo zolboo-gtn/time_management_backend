@@ -2,6 +2,7 @@ import { Body, Controller, Get, Patch, Post, UseGuards } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 
 import { RequestUser } from "common/decorators";
+import { BasicAuthGuard } from "common/guards/basic-auth.guard";
 import { JwtAuthGuard, LocalAuthGuard } from "modules/auth/guards";
 import { UserEntity, UsersService, CreateUserDto } from "modules/users";
 
@@ -16,7 +17,7 @@ export class AuthController {
     private jwtService: JwtService,
   ) {}
 
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(LocalAuthGuard, BasicAuthGuard)
   @Post("login")
   async login(@RequestUser() user: UserEntity) {
     const payload = {

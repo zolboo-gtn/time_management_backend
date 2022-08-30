@@ -30,6 +30,7 @@ import {
 } from "./dtos";
 import { JwtRoleGuard } from "./guards";
 import { IRequestWithUser } from "common/interfaces";
+import { BasicAuthGuard } from "common/guards/basic-auth.guard";
 
 @Controller("attendances")
 export class AttendancesController {
@@ -38,8 +39,8 @@ export class AttendancesController {
     private monitorService: MonitorService,
   ) {}
 
-  // TODO: Add basic auth
   @Patch("/addTimestampByCardId")
+  @UseGuards(BasicAuthGuard)
   async addTimestampByCardId(
     @Body() { timestamp, cardId }: AddTimestampByCardIdDto,
   ) {

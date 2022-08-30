@@ -4,6 +4,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { logger } from "common/middlewares";
 import { AttendancesController, AttendancesModule } from "modules/attendances";
 import { AuthModule } from "modules/auth";
+import { BasicStrategy } from "modules/auth/strategies/basic.strategy";
 import { TaskModule } from "modules/task/task.module";
 import { UsersController, UsersModule } from "modules/users";
 
@@ -19,7 +20,7 @@ import { AppService } from "./app.service";
     TaskModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, BasicStrategy],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
