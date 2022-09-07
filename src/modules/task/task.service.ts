@@ -1,13 +1,16 @@
+import { Cron } from "@nestjs/schedule";
 import { Injectable } from "@nestjs/common";
-import { Cron, Timeout } from "@nestjs/schedule";
-import { AttendancesService } from "modules/attendances";
+import { InjectQueue } from "@nestjs/bull";
+import { Queue } from "bull";
 
 @Injectable()
 export class TaskService {
-  constructor(private readonly attendanceService: AttendancesService) {}
+  constructor(
+    @InjectQueue("pull-attendance") private readonly attendanceQueue: Queue,
+  ) {}
 
-  @Cron("0 59 23 * * *", { timeZone: "Asia/Ulaanbaatar" })
-  handlePullAttendanceCron() {
-    this.attendanceService.pullFromCardData();
+  @Cron("* * * * * *", { timeZone: "Asia/Ulaanbaatar" })
+  asynchandlePullAttendanceCron() {
+    this.attendanceQueue.add("pull-attendance-from-card", new Date());
   }
 }

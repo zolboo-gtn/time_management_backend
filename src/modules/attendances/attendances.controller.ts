@@ -9,10 +9,8 @@ import {
   Post,
   Query,
   Req,
-  UseFilters,
   UseGuards,
 } from "@nestjs/common";
-import { AttendanceType } from "@prisma/client";
 import { JwtAuthGuard } from "modules/auth/guards";
 
 import { MonitorService } from "modules/monitor";
@@ -28,9 +26,8 @@ import {
   UserAttendanceDto,
   UsersAttendanceDto,
 } from "./dtos";
-import { JwtRoleGuard } from "./guards";
+import { BasicAuthGuard, JwtRoleGuard } from "./guards";
 import { IRequestWithUser } from "common/interfaces";
-import { BasicAuthGuard } from "common/guards/basic-auth.guard";
 
 @Controller("attendances")
 export class AttendancesController {

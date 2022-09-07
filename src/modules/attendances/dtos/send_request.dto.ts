@@ -8,7 +8,7 @@ export class SendRequestDto {
   @IsDateString(undefined, { message: "InvalidEndDate" })
   readonly end: string;
 
-  @Matches(/^(HOLIDAY|DAYOFF|SICK)$/, {
+  @Matches(/^(HOLIDAY|DAYOFF|SICK|OFFICE|REMOTE)$/, {
     message: "InvalidAttendanceType",
   })
   readonly type: AttendanceType;
@@ -23,7 +23,7 @@ export class UpdateRequestDto {
   @IsOptional()
   readonly end: string;
 
-  @Matches(/^(HOLIDAY|DAYOFF|SICK)$/, {
+  @Matches(/^(HOLIDAY|DAYOFF|SICK|OFFICE|REMOTE)$/, {
     message: "InvalidAttendanceType",
   })
   @IsOptional()

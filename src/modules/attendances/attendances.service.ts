@@ -10,7 +10,6 @@ import {
   CardAttendance,
   User,
 } from "@prisma/client";
-import { PaginationDto } from "common/dtos";
 import * as dayjs from "dayjs";
 
 import { PrismaService } from "modules/prisma";
@@ -24,8 +23,8 @@ import {
   UserAttendanceDto,
   UsersAttendanceDto,
 } from "./dtos";
+import { PaginationDto } from "common/dtos";
 
-const STARTHOUR: number = 16; // timeZone +8 үед 16 цаг нь 24 цагтай тэнцэнэ.
 @Injectable()
 export class AttendancesService {
   constructor(private prisma: PrismaService) {}
@@ -42,24 +41,21 @@ export class AttendancesService {
   }
 
   async startWork({ type, userId }: { type: AttendanceType; userId: number }) {
-    const today = dayjs()
-      .subtract(1, "day")
-      .set("hour", STARTHOUR)
-      .startOf("hour");
+    const today = dayjs().startOf("hour");
 
     // Өнөөдөр ажил аль хэдийн эхэлчихсэн дуусгаагүй байгаа бол дахиж үүсгэх боломжгүй байна. Буюу өмнөх ажлын цагаа дуусгасны дараа дахиж үүсгэх боломжтой байна.
-    const beforeStarted = await this.prisma.attendance.findFirst({
+    const isStarted = await this.prisma.attendance.findFirst({
       where: {
         userId,
         AND: [
           {
             start: {
-              gte: today.toDate(),
+              gte: today.toISOString(),
             },
           },
           {
             start: {
-              lt: today.add(1, "day").toDate(),
+              lt: today.add(1, "day").toISOString(),
             },
           },
           {
@@ -68,20 +64,19 @@ export class AttendancesService {
         ],
       },
     });
-    if (beforeStarted)
+    if (isStarted)
       throw new HttpException(
         `Today's work has already started.`,
         HttpStatus.BAD_REQUEST,
       );
 
-    return await this.prisma.attendance.create({ data: { type, userId } });
+    return await this.prisma.attendance.create({
+      data: { type, userId, status: "APPROVED" },
+    });
   }
 
   async endWork(userId: number) {
-    const today = dayjs()
-      .subtract(1, "day")
-      .set("hour", STARTHOUR)
-      .startOf("hour");
+    const today = dayjs().startOf("hour");
 
     // Ажлын цаг эхлээгүй бол дуусгах боломжгүй байна.
     const attendance = await this.prisma.attendance.findFirstOrThrow({
@@ -90,12 +85,12 @@ export class AttendancesService {
         AND: [
           {
             start: {
-              gte: today.toDate(),
+              gte: today.toISOString(),
             },
           },
           {
             start: {
-              lte: today.add(1, "day").toDate(),
+              lte: today.add(1, "day").toISOString(),
             },
           },
           {
@@ -245,7 +240,6 @@ export class AttendancesService {
     const startOfMonth = now
       .subtract(now.date() > 25 ? 0 : 1, "month")
       .set("date", 25)
-      .set("hour", STARTHOUR)
       .startOf("hour");
     const endOfMonth = startOfMonth.add(1, "month");
 
@@ -253,9 +247,11 @@ export class AttendancesService {
       where: {
         userId,
         createdAt: {
-          gte: startOfMonth.toDate(),
-          lt: endOfMonth.toDate(),
+          gte: startOfMonth.toISOString(),
+          lt: endOfMonth.toISOString(),
         },
+        type: { in: ["OFFICE", "REMOTE"] },
+        status: "APPROVED",
       },
     });
 
@@ -269,8 +265,7 @@ export class AttendancesService {
     const totalOverTime = items.reduce((total, value) => {
       const diffInMinutes = dayjs(value.end).diff(dayjs(value.start), "minute");
       const overTime = diffInMinutes - 8 * 60;
-
-      return total + overTime;
+      if (overTime > 0) return total + overTime;
     }, 0);
 
     return {
@@ -288,13 +283,8 @@ export class AttendancesService {
     page = 1,
     perPage = 30,
   }: UsersAttendanceDto): Promise<PaginationDto<User>> {
-    const start = dayjs(startDate ?? new Date())
-      .subtract(1, "day")
-      .set("hour", STARTHOUR)
-      .startOf("hour");
-    const end = dayjs(endDate ?? new Date())
-      .set("hour", STARTHOUR)
-      .startOf("hour");
+    const start = dayjs(startDate ?? new Date()).startOf("day");
+    const end = dayjs(endDate ?? new Date()).endOf("day");
 
     const users = await this.prisma.user.findMany({
       orderBy: sortingField ? { [sortingField]: sortingOrder } : undefined,
@@ -305,8 +295,8 @@ export class AttendancesService {
         attendance: {
           where: {
             start: {
-              gte: startDate ? start.toDate() : undefined,
-              lte: endDate ? end.toDate() : undefined,
+              gte: startDate ? start.toISOString() : undefined,
+              lte: endDate ? end.toISOString() : undefined,
             },
           },
         },
@@ -333,23 +323,18 @@ export class AttendancesService {
     };
   }
 
-  async pullFromCardData() {
-    const start = dayjs(new Date())
-      .subtract(1, "day")
-      .set("hour", STARTHOUR)
-      .startOf("hour");
-
+  async pullFromCardData(date: Date) {
     const items = await this.prisma.cardAttendance.findMany({
       where: {
         createdAt: {
-          gte: start.toDate(),
-          lt: start.add(1, "day").toDate(),
+          gte: dayjs(date).startOf("day").toISOString(),
+          lte: dayjs(date).endOf("day").toISOString(),
         },
       },
     });
 
-    items.map(async (item) => {
-      const ACCEPTEDHOUR = 9;
+    const ACCEPTEDHOUR = 9;
+    for (let item of items) {
       if (
         item.timestamps.length === 2 &&
         dayjs(item.timestamps[1]).diff(dayjs(item.timestamps[0]), "hour") >=
@@ -362,6 +347,7 @@ export class AttendancesService {
             start: item.timestamps[0],
             end: item.timestamps[1],
             type: "OFFICE",
+            status: "APPROVED",
           },
         });
       } else {
@@ -372,11 +358,9 @@ export class AttendancesService {
             end: item.timestamps.at(-1),
             type: "OFFICE",
             status: "PENDING",
-            isNormal: false,
           },
         });
       }
-    });
-    return items;
+    }
   }
 }
