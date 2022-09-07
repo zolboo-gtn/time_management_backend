@@ -63,5 +63,5 @@ enum AttendanceStatus {
   APPROVED
   DECLINED
   PENDING
-  CANCELED
+  CANCELLED
 }
