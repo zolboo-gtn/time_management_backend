@@ -5,14 +5,14 @@ import { ScheduleModule } from "@nestjs/schedule";
 
 import { AuthModule } from "modules/auth";
 import { AttendancesController, AttendancesModule } from "modules/attendances";
+import { BasicStrategy } from "modules/auth/strategies";
+import { configuration, validationSchema } from "configs";
 import { logger } from "common/middlewares";
 import { UsersController, UsersModule } from "modules/users";
 import { TaskModule } from "modules/task";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { BasicStrategy } from "modules/auth/strategies";
-import { configuration, validationSchema } from "configs";
 
 @Module({
   imports: [

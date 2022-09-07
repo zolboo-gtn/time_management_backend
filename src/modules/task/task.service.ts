@@ -9,7 +9,7 @@ export class TaskService {
     @InjectQueue("pull-attendance") private readonly attendanceQueue: Queue,
   ) {}
 
-  @Cron("* * * * * *", { timeZone: "Asia/Ulaanbaatar" })
+  @Cron("* 59 23 * * *", { timeZone: "Asia/Ulaanbaatar" })
   asynchandlePullAttendanceCron() {
     this.attendanceQueue.add("pull-attendance-from-card", new Date());
   }

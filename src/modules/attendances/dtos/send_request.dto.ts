@@ -1,6 +1,5 @@
 import { AttendanceStatus, AttendanceType } from "@prisma/client";
-import { IsDateString, IsOptional, Matches } from "class-validator";
-
+import { IsDateString, IsOptional, IsString, Matches } from "class-validator";
 export class SendRequestDto {
   @IsDateString(undefined, { message: "InvalidStartDate" })
   readonly start: string;
@@ -8,9 +7,7 @@ export class SendRequestDto {
   @IsDateString(undefined, { message: "InvalidEndDate" })
   readonly end: string;
 
-  @Matches(/^(HOLIDAY|DAYOFF|SICK|OFFICE|REMOTE)$/, {
-    message: "InvalidAttendanceType",
-  })
+  @IsString({ message: "InvalidAttendanceType" })
   readonly type: AttendanceType;
 }
 
@@ -23,9 +20,6 @@ export class UpdateRequestDto {
   @IsOptional()
   readonly end: string;
 
-  @Matches(/^(HOLIDAY|DAYOFF|SICK|OFFICE|REMOTE)$/, {
-    message: "InvalidAttendanceType",
-  })
   @IsOptional()
   readonly type: AttendanceType;
 }

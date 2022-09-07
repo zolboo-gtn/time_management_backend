@@ -334,33 +334,24 @@ export class AttendancesService {
     });
 
     const ACCEPTEDHOUR = 9;
-    for (let item of items) {
-      if (
+    for (const item of items) {
+      const isNormal =
         item.timestamps.length === 2 &&
         dayjs(item.timestamps[1]).diff(dayjs(item.timestamps[0]), "hour") >=
-          ACCEPTEDHOUR
-      ) {
-        // Normal attendance
-        await this.prisma.attendance.create({
-          data: {
-            userId: item.userId,
-            start: item.timestamps[0],
-            end: item.timestamps[1],
-            type: "OFFICE",
-            status: "APPROVED",
-          },
-        });
-      } else {
-        await this.prisma.attendance.create({
-          data: {
-            userId: item.userId,
-            start: item.timestamps[0],
-            end: item.timestamps.at(-1),
-            type: "OFFICE",
-            status: "PENDING",
-          },
-        });
-      }
+          ACCEPTEDHOUR;
+
+      const end = isNormal ? item.timestamps[1] : item.timestamps.at(-1);
+      const status = isNormal ? "APPROVED" : "PENDING";
+
+      await this.prisma.attendance.create({
+        data: {
+          userId: item.userId,
+          start: item.timestamps[0],
+          end,
+          type: "OFFICE",
+          status,
+        },
+      });
     }
   }
 }
