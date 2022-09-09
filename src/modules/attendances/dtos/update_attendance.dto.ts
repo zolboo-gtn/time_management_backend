@@ -1,6 +1,6 @@
 import { IsDateString } from "class-validator";
 
-export class UpdateAttendanceDto {
+export class UpdateCardAttendanceDto {
   @IsDateString(
     { strict: true },
     {

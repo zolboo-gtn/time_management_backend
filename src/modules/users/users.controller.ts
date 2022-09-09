@@ -18,6 +18,11 @@ import { UsersService } from "./users.service";
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  /**
+   * Хэрэглэгчидийн жагсаалт
+   * @param query
+   * @returns
+   */
   @UseGuards(JwtRoleGuard("ADMIN"))
   @Get()
   async findAll(@Query() query: SearchUsersDto) {

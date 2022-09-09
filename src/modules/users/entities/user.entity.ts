@@ -10,6 +10,7 @@ export class UserEntity implements User {
   role: Role;
   cardId: string;
   attendance: Attendance[];
+  deletedAt: Date;
 
   @Exclude()
   hash: string;
