@@ -1,4 +1,4 @@
-import { BullModule } from "@nestjs/bull";
+// import { BullModule } from "@nestjs/bull";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ScheduleModule } from "@nestjs/schedule";
@@ -27,16 +27,17 @@ import { AppService } from "./app.service";
       isGlobal: true,
       validationSchema,
     }),
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        redis: {
-          host: configService.get<string>("redis.host"),
-          port: Number(configService.get<number>("redis.port")),
-        },
-      }),
-      inject: [ConfigService],
-    }),
+    //REDIS: heroku дээр redis болохгүй байсан тул түр хасав.
+    // BullModule.forRootAsync({
+    //   imports: [ConfigModule],
+    //   useFactory: async (configService: ConfigService) => ({
+    //     redis: {
+    //       host: configService.get<string>("redis.host"),
+    //       port: Number(configService.get<number>("redis.port")),
+    //     },
+    //   }),
+    //   inject: [ConfigService],
+    // }),
   ],
   controllers: [AppController],
   providers: [AppService, BasicStrategy],
