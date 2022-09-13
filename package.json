@@ -33,6 +33,7 @@
   "dependencies": {
     "@nestjs/bull": "^0.6.1",
     "@nestjs/common": "^8.0.0",
+    "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^8.0.0",
     "@nestjs/jwt": "^8.0.0",
     "@nestjs/mapped-types": "*",
@@ -61,7 +62,6 @@
   },
   "devDependencies": {
     "@nestjs/cli": "^8.0.0",
-    "@nestjs/config": "^2.2.0",
     "@nestjs/schematics": "^8.0.0",
     "@nestjs/testing": "^8.0.0",
     "@types/bcrypt": "^5.0.0",
