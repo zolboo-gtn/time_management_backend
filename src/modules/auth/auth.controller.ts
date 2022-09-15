@@ -17,7 +17,7 @@ export class AuthController {
     private jwtService: JwtService,
   ) {}
 
-  @UseGuards(LocalAuthGuard, BasicAuthGuard)
+  @UseGuards(BasicAuthGuard, LocalAuthGuard)
   @Post("login")
   async login(@RequestUser() user: UserEntity) {
     const payload = {
