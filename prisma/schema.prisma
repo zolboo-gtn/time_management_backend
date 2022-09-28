@@ -31,6 +31,7 @@ model Attendance {
   start     DateTime         @default(now())
   type      AttendanceType   @default(REMOTE)
   status    AttendanceStatus @default(PENDING)
+  comment   String?
   user      User             @relation(fields: [userId], references: [id])
   evaluatedAt DateTime?
   evaluatedById Int?

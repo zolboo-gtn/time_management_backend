@@ -127,6 +127,12 @@ export class AttendancesService {
     });
   }
 
+  async showRequest(id: number): Promise<Attendance> {
+    return await this.prisma.attendance.findFirstOrThrow({
+      where: { id: +id },
+    });
+  }
+
   async evaluateRequest(
     data: EvaluateRequestDto,
     id: number,
@@ -190,31 +196,56 @@ export class AttendancesService {
     await this.prisma.attendance.delete({ where: { id } });
   }
 
-  async getUserAttendance({
+  async getAttendances({
     userId,
     startDate,
     endDate,
+    type,
+    status,
     sortingField,
     sortingOrder,
     page = 1,
     perPage = 30,
-  }: UserAttendanceDto): Promise<PaginationDto<Attendance>> {
-    const attendance = await this.prisma.attendance.findMany({
-      where: {
-        userId,
-        createdAt: {
-          gte: startDate ? new Date(startDate) : undefined,
-          lte: endDate ? new Date(endDate) : undefined,
+  }: UserAttendanceDto): Promise<PaginationDto<Partial<Attendance>>> {
+    const start = dayjs(startDate ?? new Date()).startOf("day");
+    const end = dayjs(endDate ?? new Date()).endOf("day");
+
+    const items = await this.prisma.attendance.findMany({
+      select: {
+        id: true,
+        start: true,
+        end: true,
+        type: true,
+        status: true,
+        comment: true,
+        evaluatedAt: true,
+        evaluatedBy: true,
+        evaluatedById: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            cardId: true,
+          },
         },
       },
       orderBy: sortingField ? { [sortingField]: sortingOrder } : undefined,
+      where: {
+        userId,
+        start: {
+          gte: startDate ? start.toISOString() : undefined,
+          lte: endDate ? end.toISOString() : undefined,
+        },
+        type,
+        status,
+      },
     });
 
     const skip = perPage * (page - 1);
-    // TODO: slice vs count()
-    const paginated = attendance.slice(skip, page * perPage);
 
-    const totalCount = attendance.length;
+    const paginated = items.slice(skip, page * perPage);
+
+    const totalCount = items.length;
     const totalPages = Math.ceil(totalCount / perPage);
     const nextPage = page < totalPages ? page + 1 : null;
     const prevPage = page > 1 ? page - 1 : null;
@@ -280,9 +311,11 @@ export class AttendancesService {
     endDate,
     sortingField,
     sortingOrder,
+    type,
+    status,
     page = 1,
     perPage = 30,
-  }: UsersAttendanceDto): Promise<PaginationDto<User>> {
+  }: UsersAttendanceDto): Promise<PaginationDto<Partial<User>>> {
     const start = dayjs(startDate ?? new Date()).startOf("day");
     const end = dayjs(endDate ?? new Date()).endOf("day");
 
@@ -291,13 +324,25 @@ export class AttendancesService {
       where: {
         deletedAt: null,
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        cardId: true,
         attendance: {
+          select: {
+            id: true,
+            start: true,
+            end: true,
+            type: true,
+            status: true,
+          },
           where: {
             start: {
               gte: startDate ? start.toISOString() : undefined,
               lte: endDate ? end.toISOString() : undefined,
             },
+            type,
+            status,
           },
         },
       },

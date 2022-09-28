@@ -1,4 +1,5 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
+import { AttendanceStatus, AttendanceType } from "@prisma/client";
 
 import { Type } from "class-transformer";
 import {
@@ -18,7 +19,8 @@ export class UserAttendanceDto {
     message: "InvalidUserId",
   })
   @Type(() => Number)
-  readonly userId: number;
+  @IsOptional()
+  readonly userId?: number;
 
   @IsDateString(undefined, { message: "InvalidStartDate" })
   @Validate(IsBeforeConstraint, ["endDate"], {
@@ -56,4 +58,10 @@ export class UserAttendanceDto {
   @IsInt()
   @Type(() => Number)
   readonly perPage?: number;
+
+  @IsOptional()
+  readonly type?: AttendanceType;
+
+  @IsOptional()
+  readonly status?: AttendanceStatus;
 }
