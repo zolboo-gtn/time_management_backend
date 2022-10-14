@@ -316,8 +316,11 @@ export class AttendancesService {
     page = 1,
     perPage = 30,
   }: UsersAttendanceDto): Promise<PaginationDto<Partial<User>>> {
-    const start = dayjs(startDate ?? new Date()).startOf("day");
     const end = dayjs(endDate ?? new Date()).endOf("day");
+    const start = dayjs(
+      startDate ??
+        end.subtract(end.date() > 25 ? 0 : 1, "month").set("date", 25),
+    ).startOf("day");
 
     const users = await this.prisma.user.findMany({
       orderBy: sortingField ? { [sortingField]: sortingOrder } : undefined,
@@ -349,8 +352,45 @@ export class AttendancesService {
     });
 
     const skip = perPage * (page - 1);
-
     const paginated = users.slice(skip, page * perPage);
+
+    let list: userAttendanceType[] = [];
+    let dates: dayjs.Dayjs[] = [];
+
+    for (let i = 0; i <= end.diff(start, "day"); i++) {
+      dates.push(start.add(i + 1, "day"));
+    }
+
+    for (const user of paginated) {
+      const _attendance = dates.map((_date) =>
+        user.attendance.filter((element) => {
+          if (
+            dayjs(element.start) >= _date.startOf("day") &&
+            dayjs(element.end) <= _date.endOf("day")
+          ) {
+            return element;
+          } else {
+            let _diff: number = dayjs(element.end).diff(
+              dayjs(element.start),
+              "day",
+            );
+            if (
+              dayjs(element.start) <= _date.endOf("day") &&
+              dayjs(element.end) >= _date.startOf("day") &&
+              dayjs(element.end) <= _date.add(_diff + 1, "day").endOf("day")
+            )
+              return element;
+          }
+        }),
+      );
+
+      list.push({
+        id: user.id,
+        name: user.name,
+        cardId: user.cardId,
+        attendances: _attendance,
+      });
+    }
 
     const totalCount = users.length;
     const totalPages = Math.ceil(totalCount / perPage);
@@ -358,7 +398,7 @@ export class AttendancesService {
     const prevPage = page > 1 ? page - 1 : null;
 
     return {
-      items: paginated,
+      items: list,
       nextPage: nextPage,
       prevPage: prevPage,
       currentPage: page,
@@ -400,3 +440,18 @@ export class AttendancesService {
     }
   }
 }
+type userAttendanceType = {
+  id: number;
+  name: string;
+  cardId: string;
+  attendances: (
+    | {
+        id: number;
+        start: Date;
+        end: Date;
+        type: string;
+        status: string;
+      }[]
+    | null
+  )[];
+};
