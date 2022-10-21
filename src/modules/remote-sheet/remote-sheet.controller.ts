@@ -12,7 +12,7 @@ import {
 } from "@nestjs/common";
 import { IRequestWithUser } from "common/interfaces";
 import { JwtAuthGuard } from "modules/auth/guards";
-import { CreateRemoteSheetDto, RemoteSheetDto } from "./dtos";
+import { RemoteSheetDto } from "./dtos";
 import { JwtRoleGuard } from "./guards";
 import { RemoteSheetService } from "./remote-sheet.service";
 
@@ -22,10 +22,7 @@ export class RemoteSheetController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  async create(
-    @Body() data: CreateRemoteSheetDto[],
-    @Req() req: IRequestWithUser,
-  ) {
+  async create(@Body() data: string[], @Req() req: IRequestWithUser) {
     return await this.service.create({
       data,
       userId: +req.user.id,
@@ -38,15 +35,9 @@ export class RemoteSheetController {
     return await this.service.delete(id);
   }
 
-  @Get("/users")
-  @UseGuards(JwtRoleGuard("ADMIN"))
-  async getMany(@Query() query: RemoteSheetDto) {
-    return await this.service.getUsers(query);
-  }
-
   @Get()
-  @UseGuards(JwtAuthGuard, JwtRoleGuard("OWNER"))
+  @UseGuards(JwtAuthGuard)
   async get(@Query() query: RemoteSheetDto, @Req() req: IRequestWithUser) {
-    return await this.service.get(query, +req.user.id);
+    return await this.service.get(query);
   }
 }

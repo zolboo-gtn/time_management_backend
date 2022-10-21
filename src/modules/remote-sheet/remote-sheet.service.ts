@@ -6,22 +6,15 @@ import { PrismaService } from "modules/prisma";
 import { PaginationDto } from "common/dtos";
 
 import { RemoteSheetDto } from "./dtos";
-import { CreateRemoteSheetDto } from "./dtos/create.dto";
 
 @Injectable()
 export class RemoteSheetService {
   constructor(private prisma: PrismaService) {}
 
-  async create({
-    data,
-    userId,
-  }: {
-    data: CreateRemoteSheetDto[];
-    userId: number;
-  }) {
+  async create({ data, userId }: { data: string[]; userId: number }) {
     const _data = [];
     data.map((item) => {
-      _data.push({ date: dayjs(item.date).toISOString(), userId });
+      _data.push({ date: dayjs(item).startOf("day").toISOString(), userId });
     });
     return await this.prisma.remoteSheet.createMany({
       data: _data,
@@ -36,91 +29,48 @@ export class RemoteSheetService {
     return await this.prisma.remoteSheet.findFirstOrThrow({ where: { id } });
   }
 
-  async getUsers({
+  async get({
     startDate,
     endDate,
-    sortingField,
-    sortingOrder,
     page = 1,
     perPage = 30,
-  }: RemoteSheetDto): Promise<PaginationDto<Partial<User>>> {
-    const start = dayjs(startDate ?? new Date()).startOf("day");
-    const end = dayjs(endDate ?? new Date()).endOf("day");
+  }: RemoteSheetDto): Promise<PaginationDto<Partial<any>>> {
+    const end = dayjs(endDate ?? dayjs().endOf("week")).endOf("day");
+    const start = dayjs(startDate ?? dayjs().startOf("week")).startOf("day");
 
-    const users = await this.prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        remoteSheet: {
-          select: {
-            id: true,
-            date: true,
-          },
-          where: {
-            date: {
-              gte: startDate ? start.toISOString() : undefined,
-              lte: endDate ? end.toISOString() : undefined,
-            },
-          },
-        },
-      },
-      orderBy: sortingField ? { [sortingField]: sortingOrder } : undefined,
-      where: {
-        deletedAt: null,
-      },
-    });
-
-    const skip = perPage * (page - 1);
-
-    const paginated = users.slice(skip, page * perPage);
-
-    const totalCount = users.length;
-    const totalPages = Math.ceil(totalCount / perPage);
-    const nextPage = page < totalPages ? page + 1 : null;
-    const prevPage = page > 1 ? page - 1 : null;
-
-    return {
-      items: paginated,
-      nextPage: nextPage,
-      prevPage: prevPage,
-      currentPage: page,
-      perPage: perPage,
-      totalPages: totalPages,
-      totalItems: totalCount,
-    };
-  }
-
-  async get(
-    {
-      startDate,
-      endDate,
-      sortingField,
-      sortingOrder,
-      page = 1,
-      perPage = 30,
-    }: RemoteSheetDto,
-    userId: number,
-  ): Promise<PaginationDto<Partial<RemoteSheet>>> {
     const items = await this.prisma.remoteSheet.findMany({
       select: {
         id: true,
         date: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       where: {
-        userId,
         createdAt: {
           gte: startDate ? new Date(startDate) : undefined,
           lte: endDate ? new Date(endDate) : undefined,
         },
       },
-      orderBy: sortingField ? { [sortingField]: sortingOrder } : undefined,
     });
 
-    const skip = perPage * (page - 1);
-    const paginated = items.slice(skip, page * perPage);
+    let dates: string[] = [];
+    for (let i = 0; i <= end.diff(start, "day"); i++) {
+      dates.push(start.add(i + 1, "day").toISOString());
+    }
 
-    const totalCount = items.length;
+    let list = [];
+    for (const date of dates) {
+      const _ll = items.filter((item) => item.date.toISOString() == date);
+      list.push(_ll.map((i) => i.user));
+    }
+    const skip = perPage * (page - 1);
+    const paginated = list.slice(skip, page * perPage);
+
+    const totalCount = list.length;
     const totalPages = Math.ceil(totalCount / perPage);
     const nextPage = page < totalPages ? page + 1 : null;
     const prevPage = page > 1 ? page - 1 : null;
