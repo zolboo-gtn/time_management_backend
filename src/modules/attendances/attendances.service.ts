@@ -41,7 +41,7 @@ export class AttendancesService {
   }
 
   async startWork({ type, userId }: { type: AttendanceType; userId: number }) {
-    const today = dayjs().startOf("hour");
+    const today = dayjs().startOf("day");
 
     // Өнөөдөр ажил аль хэдийн эхэлчихсэн дуусгаагүй байгаа бол дахиж үүсгэх боломжгүй байна. Буюу өмнөх ажлын цагаа дуусгасны дараа дахиж үүсгэх боломжтой байна.
     const isStarted = await this.prisma.attendance.findFirst({
@@ -76,7 +76,7 @@ export class AttendancesService {
   }
 
   async endWork(userId: number) {
-    const today = dayjs().startOf("hour");
+    const today = dayjs().startOf("day");
 
     // Ажлын цаг эхлээгүй бол дуусгах боломжгүй байна.
     const attendance = await this.prisma.attendance.findFirstOrThrow({
