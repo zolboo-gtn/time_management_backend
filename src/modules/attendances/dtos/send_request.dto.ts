@@ -9,6 +9,9 @@ export class SendRequestDto {
 
   @IsString({ message: "InvalidAttendanceType" })
   readonly type: AttendanceType;
+
+  @IsString({ message: "InvalidComment" })
+  readonly comment: string;
 }
 
 export class UpdateRequestDto {
@@ -22,6 +25,9 @@ export class UpdateRequestDto {
 
   @IsOptional()
   readonly type: AttendanceType;
+
+  @IsOptional()
+  readonly comment: string;
 }
 
 export class EvaluateRequestDto {

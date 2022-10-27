@@ -89,7 +89,7 @@ export class AttendancesController {
    * @param data
    * @param req
    */
-  @Post("/request-send")
+  @Post("/request")
   @UseGuards(JwtAuthGuard)
   async requestSend(
     @Body() data: SendRequestDto,
@@ -105,13 +105,19 @@ export class AttendancesController {
    * @param req
    * @returns
    */
-  @Patch("/request-update/:id")
+  @Patch("/request/:id")
   @UseGuards(JwtAuthGuard, JwtRoleGuard("OWNER"))
   async requestUpdate(
     @Body() data: UpdateRequestDto,
     @Param("id", ParseIntPipe) id: number,
   ) {
     return await this.attendancesService.updateRequest(data, id);
+  }
+
+  @Get("/request/:id")
+  @UseGuards(JwtAuthGuard, JwtRoleGuard("ADMIN", "OWNER"))
+  async requestShow(@Param("id", ParseIntPipe) id: number) {
+    return await this.attendancesService.showRequest(id);
   }
 
   @Patch("/request-evaluate/:id")
@@ -150,10 +156,10 @@ export class AttendancesController {
    * @param query
    * @returns
    */
-  @UseGuards(JwtRoleGuard("ADMIN"))
-  @Get("/userAttendance")
+  @UseGuards(JwtRoleGuard("ADMIN", "OWNER"))
+  @Get("/list")
   async getUserAttendance(@Query() query: UserAttendanceDto) {
-    return await this.attendancesService.getUserAttendance(query);
+    return await this.attendancesService.getAttendances(query);
   }
 
   @UseGuards(JwtRoleGuard("ADMIN"))

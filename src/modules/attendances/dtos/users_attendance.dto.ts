@@ -6,6 +6,8 @@ export class UsersAttendanceDto extends PickType(UserAttendanceDto, [
   "endDate",
   "sortingField",
   "sortingOrder",
+  "type",
+  "status",
   "page",
   "perPage",
 ]) {}
