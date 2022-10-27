@@ -10,6 +10,7 @@ import { configuration, validationSchema } from "configs";
 import { logger } from "common/middlewares";
 import { UsersController, UsersModule } from "modules/users";
 import { TaskModule } from "modules/task";
+import { RemoteSheetModule } from "modules/remote-sheet/remote-sheet.module";
 
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
@@ -17,6 +18,7 @@ import { AppService } from "./app.service";
 @Module({
   imports: [
     AttendancesModule,
+    RemoteSheetModule,
     AuthModule,
     UsersModule,
     ScheduleModule.forRoot(),
